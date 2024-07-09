@@ -6,7 +6,9 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const connection = require('./dbconnection');
 const User = require('./models/users'); 
+const Admin= require('./models/admin');
 const authenticateToken =require('./middlewares/userAuth');
+const wholeUserAuth= require('./routes/wholeseAuth');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,43 +18,50 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 
-const userSchema = joi.object({
+
+
+
+app.user('/user/register',wholeUserAuth);
+app.use('/user/login',wholeUserAuth)
+
+//admin authenticaton
+
+const adminSchema = joi.object({
   userName: joi.string().min(3).max(30).required(),
   userEmail: joi.string().email().required(),
   userPassword: joi.string().min(6).required()
 });
 
 
-
-app.post('/register', async (req, res) => {
-  const { error } = userSchema.validate(req.body);
+app.post('/adminRegister', async (req, res) => {
+  const { error } = adminSchema.validate(req.body);
 
   if (error) {
     return res.status(400).json({ error: error.details[0].message });
   }
 
   try {
-    const { userName, userEmail, userPassword: userPassword } = req.body;
+    const { adminName, adminEmail, adminPassword: adminPassword } = req.body;
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ userEmail });
-    if (existingUser) {
-      return res.status(400).json({ error: 'User already exists' });
+    
+    const existingAdmin = await Admin.findOne({ userEmail });
+    if (existingAdmin) {
+      return res.status(400).json({ error: 'Admin already exists' });
     }
 
     // Hash the password
-    const hashedPassword = await bcrypt.hash(userPassword, 10);
+    const hashedPassword = await bcrypt.hash(adminPassword, 10);
 
     // Create new user
-    const newUser = new User({
-      userName,
-      userEmail,
-      userPassword: hashedPassword
+    const newAdmin= new Admin({
+      adminName,
+      adminEmail,
+      adminPassword: hashedPassword
     });
 
-   if(   await newUser.save())   return  res.status(201).json({ message: 'User registered successfully' });
+   if(   await newAdmin.save())   return  res.status(201).json({ message: 'Admin registered successfully' });
     
-      return  res.status(404).json({ message: 'User registration failed' });
+      return  res.status(404).json({ message: 'Admin registration failed' });
    
   } catch (err) {
     res.status(500).json({ error: 'Internal server error' });
@@ -92,6 +101,10 @@ app.get('/userDashboard', authenticateToken, (req, res) => {
   res.status(200).json({ message: 'This is a protected route', user: req.user });
 });
 
+
+
+
 app.listen(PORT, () => {
   console.log(`The app is running on port ${PORT}`);
 });
+
