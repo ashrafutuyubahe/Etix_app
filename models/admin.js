@@ -8,6 +8,6 @@ const adminSchema = new Schema({
   adminEmail: { type: String, required: true }
 });
 
-const User = mongoose.model('admin', adminSchema);
+const admin = mongoose.model('admin', adminSchema);
 
 module.exports = admin;

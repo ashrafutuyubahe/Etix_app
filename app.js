@@ -8,7 +8,7 @@ const connection = require('./dbconnection');
 const User = require('./models/users'); 
 const Admin= require('./models/admin');
 const authenticateToken =require('./middlewares/userAuth');
-const wholeUserAuth= require('./routes/wholeseAuth');
+const wholeUserAuth= require('./routes/wholeuseAuth');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,15 +21,15 @@ app.use(express.json());
 
 
 
-app.user('/user/register',wholeUserAuth);
+app.use('/user/register',wholeUserAuth);
 app.use('/user/login',wholeUserAuth)
 
 //admin authenticaton
 
 const adminSchema = joi.object({
-  userName: joi.string().min(3).max(30).required(),
-  userEmail: joi.string().email().required(),
-  userPassword: joi.string().min(6).required()
+  adminName: joi.string().min(3).max(30).required(),
+  adminEmail: joi.string().email().required(),
+  adminPassword: joi.string().min(6).required()
 });
 
 
@@ -44,7 +44,7 @@ app.post('/adminRegister', async (req, res) => {
     const { adminName, adminEmail, adminPassword: adminPassword } = req.body;
 
     
-    const existingAdmin = await Admin.findOne({ userEmail });
+    const existingAdmin = await Admin.findOne({ adminEmail });
     if (existingAdmin) {
       return res.status(400).json({ error: 'Admin already exists' });
     }
@@ -59,35 +59,33 @@ app.post('/adminRegister', async (req, res) => {
       adminPassword: hashedPassword
     });
 
-   if(   await newAdmin.save())   return  res.status(201).json({ message: 'Admin registered successfully' });
-    
-      return  res.status(404).json({ message: 'Admin registration failed' });
-   
+   if(await newAdmin.save())   return  res.status(201).json({ message: 'Admin registered successfully' });    
+      return  res.status(404).json({ message: 'Admin registration failed' });   
   } catch (err) {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 
-app.post('/login', async (req, res) => {
-  // const { userEmail, userPassword } = req.body;
+app.post('/adminLogin', async (req, res) => {
+ 
 
   try {
-    const {userEmail,userPassword}=req.body;
+    const {adminEmail,adminPassword}=req.body;
 
-    const user = await User.findOne({ userEmail });
+    const admin = await Admin.findOne({ adminEmail });
 
-    if (!user) {
+    if (!admin) {
       return res.status(400).json({ error: 'Invalid email or password' });
     }
 
-    const validPassword = await bcrypt.compare(userPassword, user.userPassword);
+    const validPassword = await bcrypt.compare(adminPassword, admin.adminPassword);
     if (!validPassword) {
       return res.status(400).json({ error: 'Invalid email or password' });
     }
 
     
-    const token = jwt.sign({ userId: user._id }, SECRET_KEY, { expiresIn: '1h' });
+    const token = jwt.sign({ adminId: admin._id }, SECRET_KEY, { expiresIn: '1h' });
 
     res.header('Authorization', 'Bearer ' + token).json({ message: 'Logged in successfully' });
   } catch (err) {

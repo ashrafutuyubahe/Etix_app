@@ -1,5 +1,6 @@
 
 const express= require('express');
+const joi = require('joi');
 const  Router= express.Router();
 
 const userSchema = joi.object({
