@@ -1,39 +1,127 @@
-require('dotenv').config();
-const express = require('express');
-const joi = require('joi');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose');
-const connection = require('./dbconnection');
-const User = require('./models/users'); 
-const Admin= require('./models/admin');
-const authenticateToken =require('./middlewares/userAuth');
-const wholeUserAuth= require('./routes/wholeuseAuth');
-
+require("dotenv").config();
+const express = require("express");
+const joi = require("joi");
+const path = require('path');
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const mongoose = require("mongoose");
+const session = require("express-session");
+const passport = require("passport");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const connection = require("./dbconnection");
+const User = require("./models/users");
+const Admin = require("./models/admin");
+const authenticateToken = require("./middlewares/userAuth");
+const wholeUserAuth = require("./routes/wholeuseAuth");
+const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3000;
-const SECRET_KEY = process.env.SECRET_KEY || 'your_secret_key';
+const SECRET_KEY = process.env.SECRET_KEY || "your_secret_key";
 
+app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Session middleware
+app.use(
+  session({
+    resave: false,
+    saveUninitialized: true,
+    secret: "SECRET",
+  })
+);
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Google OAuth configuration
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.CLIENT_ID,
+      clientSecret: process.env.CLIENT_SECRET,
+      callbackURL: "http://localhost:2000",
+      scope: ["profile", "email"],
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      // Find or create user in your database
+      const existingUser = await User.findOne({ googleId: profile.id });
+      if (existingUser) {
+        return done(null, existingUser);
+      }
+      const newUser = new User({
+        googleId: profile.id,
+        userName: profile.displayName,
+        userEmail: profile.emails[0].value,
+      });
+      await newUser.save();
+      done(null, newUser);
+    }
+  )
+);
+
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser(async (id, done) => {
+  const user = await User.findById(id);
+  done(null, user);
+});
+
+// Routes
+app.get('/', (req, res) => {
+  res.render('landing');
+});
+
+app.get('/login', (req, res) => {
+  res.render('login');
+});
+
+app.get('/dash', (req, res) => {
+  res.render('dashboard');
+});
+
+app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
+  res.redirect('/login');
+});
+
+app.get('/logout', (req, res) => {
+  req.logout((err) => {
+    if (err) { return next(err); }
+    res.redirect('/');
+  });
+});
+
+
+app.use('/user', wholeUserAuth);
+app.use('/', wholeUserAuth);
 
 
 
 
 
-app.use('/user/register',wholeUserAuth);
-app.use('/user/login',wholeUserAuth)
+
+
+
+app.use("/user", wholeUserAuth);
+app.use("/user/login", wholeUserAuth);
 
 //admin authenticaton
 
 const adminSchema = joi.object({
   adminName: joi.string().min(3).max(30).required(),
   adminEmail: joi.string().email().required(),
-  adminPassword: joi.string().min(6).required()
+  adminPassword: joi.string().min(6).required(),
 });
 
-
-app.post('/adminRegister', async (req, res) => {
+app.post("/adminRegister", async (req, res) => {
   const { error } = adminSchema.validate(req.body);
 
   if (error) {
@@ -43,66 +131,65 @@ app.post('/adminRegister', async (req, res) => {
   try {
     const { adminName, adminEmail, adminPassword: adminPassword } = req.body;
 
-    
     const existingAdmin = await Admin.findOne({ adminEmail });
     if (existingAdmin) {
-      return res.status(400).json({ error: 'Admin already exists' });
+      return res.status(400).json({ error: "Admin already exists" });
     }
 
     // Hash the password
     const hashedPassword = await bcrypt.hash(adminPassword, 10);
 
     // Create new user
-    const newAdmin= new Admin({
+    const newAdmin = new Admin({
       adminName,
       adminEmail,
-      adminPassword: hashedPassword
+      adminPassword: hashedPassword,
     });
 
-   if(await newAdmin.save())   return  res.status(201).json({ message: 'Admin registered successfully' });    
-      return  res.status(404).json({ message: 'Admin registration failed' });   
+    if (await newAdmin.save())
+      return res.status(201).json({ message: "Admin registered successfully" });
+    return res.status(404).json({ message: "Admin registration failed" });
   } catch (err) {
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
-
-app.post('/adminLogin', async (req, res) => {
- 
-
+app.post("/adminLogin", async (req, res) => {
   try {
-    const {adminEmail,adminPassword}=req.body;
+    const { adminEmail, adminPassword } = req.body;
 
     const admin = await Admin.findOne({ adminEmail });
 
     if (!admin) {
-      return res.status(400).json({ error: 'Invalid email or password' });
+      return res.status(400).json({ error: "Invalid email or password" });
     }
 
-    const validPassword = await bcrypt.compare(adminPassword, admin.adminPassword);
+    const validPassword = await bcrypt.compare(
+      adminPassword,
+      admin.adminPassword
+    );
     if (!validPassword) {
-      return res.status(400).json({ error: 'Invalid email or password' });
+      return res.status(400).json({ error: "Invalid email or password" });
     }
 
-    
-    const token = jwt.sign({ adminId: admin._id }, SECRET_KEY, { expiresIn: '1h' });
+    const token = jwt.sign({ adminId: admin._id }, SECRET_KEY, {
+      expiresIn: "1h",
+    });
 
-    res.header('Authorization', 'Bearer ' + token).json({ message: 'Logged in successfully' });
+    res
+      .header("Authorization", "Bearer " + token)
+      .json({ message: "Logged in successfully" });
   } catch (err) {
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
-
-
-app.get('/userDashboard', authenticateToken, (req, res) => {
-  res.status(200).json({ message: 'This is a protected route', user: req.user });
+app.get("/userDashboard", authenticateToken, (req, res) => {
+  res
+    .status(200)
+    .json({ message: "This is a protected route", user: req.user });
 });
-
-
-
 
 app.listen(PORT, () => {
   console.log(`The app is running on port ${PORT}`);
 });
-
