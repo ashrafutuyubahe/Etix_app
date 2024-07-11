@@ -1,20 +1,36 @@
-// sendSms.js
-require('dotenv').config();
-const twilio = require('twilio');
+const express= require('express');
+const Router = express.Router();
+const axios= require('axios');
 
-const accountSid = 'ACbe5da0a4de57d9e888203e9ba204258a';
-const authToken = '0e192b96d0459f01e97683edb73c9bcd';
-const client = twilio(accountSid, authToken);
+//message logic
+const sendSMS = async (phone, message) => {
+    try {
+      const response = await axios.post('https://textbelt.com/text', {
+        phone: phone,
+        message: message,
+        key: 'textbelt',
+      });
+  
+      if (response.data.success) {
+        return { success: true, message: 'Message sent successfully.' };
+      } else {
+        return { success: false, error: response.data.error };
+      }
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  };
 
-const sendSms = (to, body) => {
-  client.messages
-    .create({
-      body: body,
-      to: to, // Text this number
-      from: '+15017122661', // From a valid Twilio number
-    })
-    .then((message) => console.log(`Message sent: ${message.sid}`))
-    .catch((error) => console.error(error));
-};
+  
+  Router.post('/send-sms', async (req, res) => {
+    const { to, text } = req.body;
+  
+    const result = await sendSMS(to, text);
+    if (result.success) {
+      res.status(200).json({ message: result.message });
+    } else {
+      res.status(500).json({ error: result.error });
+    }
+  });
 
-module.exports = sendSms;
+  module.exports= Router;

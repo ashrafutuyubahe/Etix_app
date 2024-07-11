@@ -17,20 +17,17 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const SECRET_KEY = process.env.SECRET_KEY || "your_secret_key";
-
+const  sendSMS= require('./msgconfig');
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
-const sendSms = require('./msgconfig'); 
 
-app.post('/send-sms', (req, res) => {
-  const { to, body } = req.body;
-  sendSms(to, body);
-  res.status(200).json({ message: 'SMS sent successfully' });
-});
+
+
+
 
 
 
@@ -110,6 +107,7 @@ app.get('/logout', (req, res) => {
 
 app.use('/user', wholeUserAuth);
 app.use('/', wholeUserAuth);
+app.use('/user/send-mesdsage/',sendSMS)
 
 
 
