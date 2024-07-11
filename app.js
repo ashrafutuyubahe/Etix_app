@@ -24,8 +24,16 @@ app.use(express.json());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
+const sendSms = require('./msgconfig'); 
 
-// Session middleware
+app.post('/send-sms', (req, res) => {
+  const { to, body } = req.body;
+  sendSms(to, body);
+  res.status(200).json({ message: 'SMS sent successfully' });
+});
+
+
+
 app.use(
   session({
     resave: false,
@@ -44,7 +52,7 @@ passport.use(
     {
       clientID: process.env.CLIENT_ID,
       clientSecret: process.env.CLIENT_SECRET,
-      callbackURL: "http://localhost:2000",
+      callbackURL: "http://localhost:2000/dash",
       scope: ["profile", "email"],
     },
     async (accessToken, refreshToken, profile, done) => {
