@@ -24,6 +24,44 @@ app.use(express.json());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
+const nodemailer = require('nodemailer');
+const initiateAirtelMoneyPayment = require('./airtelpay');
+
+//email sending logic
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user:"ashraftuyubahe001@gmail.com",
+    pass:"mbpy qfhl vsmj twf"
+  }
+});
+
+const sendEmail = async (to, subject, text) => {
+  const mailOptions = {
+    from: "ashraftuyubahe001@gmail.com",
+    to: to,
+    subject: subject,
+    text: text
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    return { success: true, message: 'Email sent: ' + info.response };
+  } catch (error) {
+    return { success: false, error: 'Error sending email: ' + error };
+  }
+};
+
+app.post('/send-email', async (req, res) => {
+  const { to, subject, text } = req.body;
+
+  const result = await sendEmail(to, subject, text);
+  if (result.success) {
+    res.status(200).json({ message: result.message });
+  } else {
+    res.status(500).json({ error: result.error });
+  }
+});
 
 
 
@@ -107,7 +145,7 @@ app.get('/logout', (req, res) => {
 
 app.use('/user', wholeUserAuth);
 app.use('/', wholeUserAuth);
-app.use('/user/send-mesdsage/',sendSMS)
+app.use('/user/send-message/',sendSMS)
 
 
 
@@ -198,4 +236,32 @@ app.get("/userDashboard", authenticateToken, (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`The app is running on port ${PORT}`);
+});
+
+//airtel payment integration
+app.post('/pay', async (req, res) => {
+  const { phoneNumber, amount } = req.body;
+  try {
+    await initiateAirtelMoneyPayment(phoneNumber, amount);
+    res.status(200).send('Payment initiated successfully');
+  } catch (error) {
+    res.status(500).send('Payment initiation failed');
+  }
+});
+
+app.post('/pay', async (req, res) => {
+  const { phoneNumber, amount } = req.body;
+  try {
+    await initiateAirtelMoneyPayment(phoneNumber, amount);
+    res.status(200).send('Payment initiated successfully');
+  } catch (error) {
+    res.status(500).send('Payment initiation failed');
+  }
+});
+
+app.post('/airtel-money-webhook', (req, res) => {
+  const paymentStatus = req.body;
+  console.log('Payment status received:', paymentStatus);
+  alert(paymentStatus)
+  res.sendStatus(200);
 });

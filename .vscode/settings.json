@@ -1,9 +1,17 @@
 {
   "cSpell.words": [
+    "Airtel",
+    "airtelpay",
+    "authenticaton",
     "dbconnection",
     "Eticket",
+    "mbpy",
+    "msgconfig",
+    "qfhl",
     "tuyubaheashrafu",
+    "vsmj",
     "wholese",
     "wholeuse"
-  ]
+  ],
+  "C_Cpp.errorSquiggles": "disabled"
 }
