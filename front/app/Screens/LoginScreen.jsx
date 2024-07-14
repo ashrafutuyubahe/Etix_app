@@ -22,6 +22,7 @@ const LoginScreen = () => {
     dispatch(setLoginData([email , password]));
     setPassword('');
     setEmail('')
+    navigator.navigate('Test')
   }
 
 
@@ -48,6 +49,10 @@ const LoginScreen = () => {
 
   return (
     <>
+    <View style={{width:'100%',backgroundColor:'#032B44',flex:1,justifyContent:'center',alignContent:'center'}}>
+    <Text className='mb-7' style={{fontSize:40,fontWeight:'900',color:'white',paddingLeft:175}}>
+    ETIX
+   </Text>
     <View style={{   
       position: 'absolute',
       top: 75,
@@ -62,6 +67,10 @@ const LoginScreen = () => {
       <MaterialCommunityIcons name="menu" size={24}  color="#000"  />
       </TouchableOpacity>
       </View>
+    
+    </View>
+    <View style={{backgroundColor:'white',flex: 1, justifyContent: 'center', alignItems: 'center',width:'100%',height:'40%'}}>
+    
       <View
        style={{  
     zIndex:1,
@@ -73,20 +82,21 @@ const LoginScreen = () => {
       
        <Animated.View 
        style={{backgroundColor:'white',
-         position:'relative',
-         top:'20%',
+        position:'relative',
          width:400,
          height:120,
          justifyContent:'center', 
          opacity, 
          padding:30
          ,borderRadius:15 ,
-         top:'-35%',
-         left:'0%'}}>
+         top:'-377%',
+         left:'0%',
+         backgroundColor:'#E5EDF0'}}>
          <Text className='text-center text-2xl text-center'>
           
          <TouchableOpacity onPress={()=>navigator.navigate('Agency Login')}>
-      <Text className='text-1.8xl  text-white mt-5 text-center' style={{ width:260, height:50 , backgroundColor: '#032B44',  borderRadius: 5 , alignItems:'center'}}>
+         
+      <Text className='text-1.8xl  text-white mt-5 text-center' style={{ width:260, height:50 , backgroundColor: '#032B44',  borderRadius: 5 , alignItems:'center',paddingTop:15}}>
         <Text  >Agency login</Text> 
       </Text>
       </TouchableOpacity>
@@ -97,7 +107,7 @@ const LoginScreen = () => {
   
       
       </View>
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center',position:'absolute' }}>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center',backgroundColor:'#E5EDF0',width:400,height:550,borderRadius:20,position:'relative',top:'-30%' }}>
    
     <TouchableOpacity>
       <Text className='text-1.8xl mb-5 text-white mt-5 text-center' style={{ width:360, height:50 , backgroundColor:'#032B44', padding: 10, borderRadius: 5 , justifyContent:'center',alignItems:'center'}}>
@@ -106,10 +116,7 @@ const LoginScreen = () => {
         require('../assets/google.png')} /> <Text className="text-white" style={{fontSize:15}}>Login with Google</Text> 
       </Text>
       </TouchableOpacity>
-   <Text style={{fontSize:40,fontWeight:'900',color:'#032B44'}}>
-    ETICS
-   </Text>
-     
+  
       <TextInput
         placeholder="  Email"
         className='mt-3'
@@ -137,7 +144,7 @@ const LoginScreen = () => {
       <Text className='text-blue-1000 text-psemibold  text-1xl' style={{fontSize:18,color:'#032B44',fontWeight:'600'}}>
         Dont have an account?
         
-        <Text className='text-blue-900 text-psemibold mt-5' style={{ fontSize: 20,fontWeight:'900'}} onPress={()=> navigator.navigate('Test')}>Signup</Text>
+        <Text className='text-blue-900 text-psemibold mt-5' style={{ fontSize: 20,fontWeight:'900'}} onPress={()=> navigator.navigate('Signup')}>Signup</Text>
         
       </Text>
    
@@ -147,6 +154,8 @@ const LoginScreen = () => {
         </View>
       </TouchableOpacity>
       
+    </View>
+    
     </View>
     </>
   );

@@ -34,21 +34,33 @@ const SignupScreen = () => {
   };
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center',  }}>
-    
-      <Text className='text-2xl' style={{ fontSize: 28, color:'blue',marginBottom: 20 }}>Sign up</Text>
+    <>
+     <View style={{width:'100%',backgroundColor:'#032B44',flex:1,justifyContent:'center',alignContent:'center'}}>
+    <Text className='mb-7' style={{fontSize:40,fontWeight:'900',color:'white',paddingLeft:175}}>
+    ETIX
+   </Text>
+   </View>
+   
+    <View style={{ flex: 2, justifyContent: 'center', alignItems: 'center',backgroundColor:'#E5EDF0',width:400,height:750,borderRadius:20,position:'relative',top:'-10%',left:'6%' }}>
+    <TouchableOpacity>
+      <Text className='text-1.8xl mb-5 text-white mt-5 text-center' style={{ width:360, height:50 , backgroundColor:'#032B44', padding: 10, borderRadius: 5 , justifyContent:'center',alignItems:'center',fontWeight:500}}>
+      
+       <Image  style={{width:30,height:23}} resizeMode='contain' source={
+        require('../assets/google.png')} /> <Text onPress={()=>navigator.navigate('Home')}>Signup with Google</Text> 
+      </Text>
+      </TouchableOpacity>
       <TextInput
-        placeholder="Name"
+        placeholder="   Name"
         value={name}
         onChangeText={(text) => setName(text)}
-        style={{ height: 40, width:260, borderRadius:5 , borderColor: '#ccc', borderWidth: 1 }}
+        style={{ height: 55, width:350,borderRadius:10, borderColor: '#ccc', borderWidth: 1 ,backgroundColor:'white' }}
       />
       <TextInput
-        placeholder="Email"
+        placeholder="   Email"
         className='mt-3'
         value={email}
         onChangeText={(text) => setEmail(text)}
-        style={{ height: 40, width:260,borderRadius:5, borderColor: '#ccc', borderWidth: 1 }}
+        style={{ height: 55, width:350,borderRadius:10, borderColor: '#ccc', borderWidth: 1 ,backgroundColor:'white' }}
       />
        <View>
         <Text className='text-blue-700' style={{ fontSize: 16, marginVertical: 10 }}>
@@ -57,7 +69,7 @@ const SignupScreen = () => {
       <PhoneInput
         type="phone"
         value={phone}
-        style={{  height: 40,borderRadius: 5, width:260, borderColor: '#ccc', borderWidth: 1 }}
+        style={{ height: 55, width:350,borderRadius:10, borderColor: '#ccc', borderWidth: 1 ,backgroundColor:'white' }}
         onChangeText={(text)=>setPhone(text)}
       
         toolbarProps={{
@@ -75,11 +87,11 @@ const SignupScreen = () => {
       
     </View>
       <TextInput
-        placeholder="Password"
+        placeholder="   Password"
         className='mt-3'
         value={password}
         onChangeText={(text) => setPassword(text)}
-        style={{ height: 40, width:260, borderColor: '#ccc', borderWidth: 1 ,borderRadius: 5}}
+        style={{ height: 55, width:350,borderRadius:10, borderColor: '#ccc', borderWidth: 1 ,backgroundColor:'white' }}
         secureTextEntry={true}
       />
       
@@ -88,19 +100,9 @@ const SignupScreen = () => {
           <Text style={{ color: '#fff'}}>Sign up</Text>
         </View>
       </TouchableOpacity>
-      <Text className='text-black-600 mt-2 '>
-        or
-      </Text>
-  
-      <TouchableOpacity>
-      <Text className='text-1.8xl mb-5 text-white mt-5 text-center' style={{ width:260, height:50 , backgroundColor: 'blue', padding: 10, borderRadius: 5 , justifyContent:'center',alignItems:'center'}}>
-      
-       <Image  style={{width:30,height:23}} resizeMode='contain' source={
-        require('../assets/google.png')} /> <Text onPress={()=>navigator.navigate('Home')}>Signup with Google</Text> 
-      </Text>
-      </TouchableOpacity>
      
     </View>
+    </>
   );
 };
 

@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux'
 import { setDestinationa, setOrgina } from '../appSlice/appSlices'
 import { useNavigation } from '@react-navigation/native'
 import PlacesAutoComplete from '../components/PlacesAutoComplete'
+import HorizontalScrollView from '../components/HorizontalScroll'
 
 
 
@@ -31,27 +32,30 @@ const Home = () => {
   return (<>
     <View className='w-full justify-center items-center h-full px-4' style={{justifyContent:'space-between',backgroundColor:'#032B44',height:150}}>
           <Text style={{color:'white',position:'absolute',top:'41%',left:'10%',fontSize:27,fontWeight:'900'}}>
-            ETICS
+            ETIX
           </Text>
            <TouchableOpacity  style={{position:'absolute',top:'39%',left:'84%'}} >
            <MaterialCommunityIcons name="menu" size={34}  color="white" />
            </TouchableOpacity>
       </View>
-    <SafeAreaView className='h-full' style={{backgroundColor:'white',}}>
-     <ScrollView contentContainerStyle={{height:1000,justifyContent:'flex',paddingLeft:45}} style={{flex:1,}}>
+    <View className='h-full' style={{backgroundColor:'white',}}>
+     <ScrollView contentContainerStyle={{height:1000,justifyContent:'flex'}} style={{flex:1,}}>
       <View>
-        
+        <HorizontalScrollView />
       </View>
+      <View style={{paddingLeft:'9.5%'}}>
       <View style={{
            justifyContent:'center',
            justifyContent:'space-between',
+           position:'relative',
+           top:-75,
            width: 370,
            height: 450,
            backgroundColor: '#E5EDF0',
            borderRadius: 20,
            alignItems: 'center',
       }}>
-       <Text style={{justifyContent:'flex-start',color:'white',fontSize:17,fontWeight:'3000',paddingTop:17,paddingLeft:58,height: 60, width:355,borderRadius:5, borderColor: '#ccc', borderWidth: 1,backgroundColor:'#032B44'}} className='mt-5'>
+       <Text style={{justifyContent:'flex-start',color:'white',fontSize:17,fontWeight:'3000',paddingTop:17,paddingLeft:55,height: 60, width:355,borderRadius:5, borderColor: '#ccc', borderWidth: 1,backgroundColor:'#032B44'}} className='mt-5'>
         Choose your orgin and destination
        </Text>
        <Text style={{justifyContent:'center',color:'#032B44',fontSize:20,fontWeight:'bold',paddingTop:25,paddingBottom:25}}>
@@ -110,9 +114,9 @@ const Home = () => {
        </TouchableOpacity>
     </View>
       </View>
-      
+      </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
     </>
   )
 }

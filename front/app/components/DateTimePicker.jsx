@@ -1,29 +1,26 @@
-import React, { useState } from 'react';
-import DateTimePicker from 'react-native-datepicker';
+import React, { useState } from 'react'
+import { Button } from 'react-native'
+import DatePicker from 'react-native-date-picker'
 
-const DateTime = () => {
-  const [date, setDate] = useState(new Date());
-
-  const onDateChange = (date) => {
-    setDate(date);
-  };
-
+export default function DateTime ()  {
+  const [date, setDate] = useState(new Date())
+  const [open, setOpen] = useState(false)
 
   return (
-    <View>
-      <Text>Selected Date and Time: {date.toLocaleDateString()} {date.toLocaleTimeString()}</Text>
-      <DateTimePicker
-        style={{ height: 40, width:260,borderRadius:5, borderColor: '#ccc', borderWidth: 1 }}
+    <>
+      <Button title="Open" onPress={() => setOpen(true)} />
+      <DatePicker
+        modal
+        open={open}
         date={date}
-        mode="datetime"
-        onDateChange={onDateChange}
-        androidMode="calendar"
-        maxDate={new Date('2025-12-31')}
-        minDate={new Date('2020-01-01')}
-        showIcon={true}
+        onConfirm={(date) => {
+          setOpen(false)
+          setDate(date)
+        }}
+        onCancel={() => {
+          setOpen(false)
+        }}
       />
-    </View>
-  );
-};
-
-export default DateTime
+    </>
+  )
+}

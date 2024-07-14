@@ -3,6 +3,7 @@ import { SafeAreaView,View,Image , Animated,Text, TextInput, TouchableOpacity } 
 import { useDispatch } from 'react-redux';
 import { setAgecnyLoginData } from '../appSlice/appSlices';
 import { Picker } from '@react-native-picker/picker';
+import { useNavigation } from '@react-navigation/native';
 
 
 
@@ -11,6 +12,7 @@ const AgencyLogin = () => {
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
   const [selectedAgency, setSelectedAgency] = useState('');
+  const navigator =useNavigation()
 
   
   const HandleLogin =(e)=>{
@@ -18,6 +20,7 @@ const AgencyLogin = () => {
     dispatch(setAgecnyLoginData([selectedAgency , email , password]));
     setPassword('');
     setEmail('')
+    navigator.navigate('pages')
   }
 
 
@@ -25,13 +28,13 @@ const AgencyLogin = () => {
 
   return (
     <>
-    
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-   
-  
-    <Text className='mb-7' style={{fontSize:40,fontWeight:'900',color:'#032B44'}}>
-    Agency Login
+    <View style={{width:'100%',backgroundColor:'#032B44',flex:1,justifyContent:'center',alignContent:'center'}}>
+    <Text className='mb-7' style={{fontSize:40,fontWeight:'900',color:'white',paddingLeft:175}}>
+    ETIX
    </Text>
+    </View>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center',position:'relative',top:'-15%',paddingLeft:4 }}>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center',backgroundColor:'#E5EDF0',width:400,height:550,borderRadius:15,position:'relative'}}>
       <View>
       <Picker
         
@@ -72,10 +75,21 @@ const AgencyLogin = () => {
           <Text style={{ color: '#fff',fontSize:16,fontWeight:'900',alignContent:'center',paddingLeft:70}} >Login</Text>
         </View>
       </TouchableOpacity>
-      
+      </View>
     </View>
     </>
   );
 };
 
 export default AgencyLogin;
+
+
+
+
+
+
+
+
+
+
+
