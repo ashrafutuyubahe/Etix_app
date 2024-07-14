@@ -25,7 +25,10 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 const nodemailer = require('nodemailer');
-const initiateAirtelMoneyPayment = require('./airtelpay');
+const CLIENT_SECRET_ID="804330"
+const CLIENT_ID="78dfb2e0-ddf3-4366-b7b5-cafff4739f56";
+const axios = require('axios');
+
 
 //email sending logic
 const transporter = nodemailer.createTransport({
@@ -234,26 +237,71 @@ app.get("/userDashboard", authenticateToken, (req, res) => {
     .json({ message: "This is a protected route", user: req.user });
 });
 
-app.listen(PORT, () => {
-  console.log(`The app is running on port ${PORT}`);
-});
 
-//airtel payment integration
-app.post('/pay', async (req, res) => {
-  const { phoneNumber, amount } = req.body;
+
+
+
+
+
+
+const getAccessToken = async () => {
   try {
-    await initiateAirtelMoneyPayment(phoneNumber, amount);
-    res.status(200).send('Payment initiated successfully');
+    const response = await axios.post('https://openapi.airtel.africa/auth/oauth2/token', {
+      client_id: CLIENT_ID,
+      client_secret: CLIENT_SECRET_ID,
+      grant_type: 'client_credentials'
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    return response.data.access_token;
   } catch (error) {
-    res.status(500).send('Payment initiation failed');
+    console.error('Failed to get access token:', error.response ? error.response.data : error.message);
+    throw error;
   }
-});
+};
+
+// Function to initiate payment
+const initiateAirtelMoneyPayment = async (phoneNumber, amount, companyAccount) => {
+  try {
+    const accessToken = await getAccessToken();
+    const response = await axios.post('https://openapi.airtel.africa/merchant/v1/payments/', {
+      reference: 'unique_transaction_reference',
+      subscriber: {
+        country: 'RWA', // replace with the country code if different
+        currency: 'RWF',
+        msisdn: phoneNumber
+      },
+      transaction: {
+        amount: amount,
+        country: 'RWA', // replace with the country code if different
+        currency: 'RWF',
+      },
+      companyAccount: companyAccount
+    }, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    console.log('Payment successful:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Payment failed:', error.response ? error.response.data : error.message);
+    throw error;
+  }
+};
+
+
+
 
 app.post('/pay', async (req, res) => {
-  const { phoneNumber, amount } = req.body;
+  const { phoneNumber, amount, companyAccount } = req.body;
   try {
-    await initiateAirtelMoneyPayment(phoneNumber, amount);
-    res.status(200).send('Payment initiated successfully');
+    const paymentResponse = await initiateAirtelMoneyPayment(phoneNumber, amount, companyAccount);
+    res.status(200).json(paymentResponse);
   } catch (error) {
     res.status(500).send('Payment initiation failed');
   }
@@ -262,6 +310,12 @@ app.post('/pay', async (req, res) => {
 app.post('/airtel-money-webhook', (req, res) => {
   const paymentStatus = req.body;
   console.log('Payment status received:', paymentStatus);
-  alert(paymentStatus)
+  
   res.sendStatus(200);
+});
+
+
+
+app.listen(PORT, () => {
+  console.log(`The app is running on port ${PORT}`);
 });
