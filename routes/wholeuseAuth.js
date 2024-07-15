@@ -11,6 +11,7 @@ const userSchema = joi.object({
   userName: joi.string().min(3).max(30).required(),
   userEmail: joi.string().email().required(),
   userPassword: joi.string().min(6).required(),
+  userPhoneNumber: joi.string().min(13).required(),
 });
 
 Router.post("/userRegister", async (req, res) => {
@@ -21,11 +22,11 @@ Router.post("/userRegister", async (req, res) => {
   }
 
   try {
-    const { userName, userEmail,userPassword } = req.body;
+    const { userName, userEmail,userPassword,userPhoneNumber } = req.body;
 
     const existingUser = await User.findOne({ userEmail });
     if (existingUser) {
-      return res.status(400).json({ error: "User already exists. please login with other credentials" });
+      return res.status(400).json({ error: "User already exists. please Register with other credentials" });
     }
 
     const hashedPassword = await bcrypt.hash(userPassword, 10);
@@ -34,6 +35,7 @@ Router.post("/userRegister", async (req, res) => {
       userName,
       userEmail,
       userPassword: hashedPassword,
+      userPhoneNumber
     });
    
  const saveUser= await newUser.save();
@@ -48,32 +50,5 @@ Router.post("/userRegister", async (req, res) => {
   }
 });
 
-
-Router.post("/login", async (req, res) => {
-  try {
-    const { userEmail, userPassword } = req.body;
-
-    const User = await User.findOne({ userEmail });
-
-    if (!User) {
-      return res.status(400).json({ error: "Invalid email or password" });
-    }
-
-    const validPassword = await bcrypt.compare(userPassword, User.userPassword);
-    if (!validPassword) {
-      return res.status(400).json({ error: "Invalid email or password" });
-    }
-
-    const token = jwt.sign({ userId: User._id }, SECRET_KEY, {
-      expiresIn: "1h",
-    });
-
-    res
-      .header("Authorization", "Bearer " + token)
-      .json({ message: "Logged in successfully" });
-  } catch (err) {
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
 
 module.exports = Router;

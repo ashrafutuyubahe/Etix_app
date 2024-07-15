@@ -1,15 +1,16 @@
 require("dotenv").config();
 const express = require("express");
 const joi = require("joi");
+const connection= require('./dbconnection');
 const path = require('path');
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const User = require("./models/users");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
-const connection = require("./dbconnection");
-const User = require("./models/users");
+const userlogin= require('./routes/userlogin');
 const Admin = require("./models/admin");
 const authenticateToken = require("./middlewares/userAuth");
 const wholeUserAuth = require("./routes/wholeuseAuth");
@@ -28,6 +29,32 @@ const nodemailer = require('nodemailer');
 const CLIENT_SECRET_ID="804330"
 const CLIENT_ID="78dfb2e0-ddf3-4366-b7b5-cafff4739f56";
 const axios = require('axios');
+
+
+//cors  configuration
+const allowedOrigins = [
+  'http://localhost:19006', 
+  'exp://127.0.0.1:19000', 
+  'exp://192.168.43.76:8081', 
+];
+
+
+const corsOptions = {
+  origin: (origin, callback) => {
+   
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  }
+};
+
+app.use(cors(corsOptions));
+
+
+
 
 
 //email sending logic
@@ -119,35 +146,38 @@ passport.deserializeUser(async (id, done) => {
   done(null, user);
 });
 
+
 // Routes
 app.get('/', (req, res) => {
   res.render('landing');
 });
 
-app.get('/login', (req, res) => {
-  res.render('login');
-});
+// app.get('/login', (req, res) => {
+//   res.render('login');
+// });
 
-app.get('/dash', (req, res) => {
-  res.render('dashboard');
-});
+// app.get('/dash', (req, res) => {
+//   res.render('dashboard');
+// });
 
-app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+// app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
-app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
-  res.redirect('/login');
-});
+// app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
+//   res.redirect('/login');
+// });
 
-app.get('/logout', (req, res) => {
-  req.logout((err) => {
-    if (err) { return next(err); }
-    res.redirect('/');
-  });
-});
+// app.get('/logout', (req, res) => {
+//   req.logout((err) => {
+//     if (err) { return next(err); }
+//     res.redirect('/');
+//   });
+// });
 
 
-app.use('/user', wholeUserAuth);
+
+
 app.use('/', wholeUserAuth);
+app.use('/userlogin/',userlogin)
 app.use('/user/send-message/',sendSMS)
 
 
@@ -157,8 +187,6 @@ app.use('/user/send-message/',sendSMS)
 
 
 
-app.use("/user", wholeUserAuth);
-app.use("/user/login", wholeUserAuth);
 
 //admin authenticaton
 
