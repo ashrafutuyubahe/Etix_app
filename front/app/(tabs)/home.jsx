@@ -46,9 +46,8 @@ const Home = () => {
       <View style={{paddingLeft:'9.5%'}}>
       <View style={{
            justifyContent:'center',
-           justifyContent:'space-between',
            position:'relative',
-           top:-75,
+           top:5,
            width: 370,
            height: 450,
            backgroundColor: '#E5EDF0',
