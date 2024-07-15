@@ -152,26 +152,26 @@ app.get('/', (req, res) => {
   res.render('landing');
 });
 
-// app.get('/login', (req, res) => {
-//   res.render('login');
-// });
+app.get('/login', (req, res) => {
+  res.render('login');
+});
 
-// app.get('/dash', (req, res) => {
-//   res.render('dashboard');
-// });
+app.get('/dash', (req, res) => {
+  res.render('dashboard');
+});
 
-// app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
-// app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
-//   res.redirect('/login');
-// });
+app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
+  res.redirect('/login');
+});
 
-// app.get('/logout', (req, res) => {
-//   req.logout((err) => {
-//     if (err) { return next(err); }
-//     res.redirect('/');
-//   });
-// });
+app.get('/logout', (req, res) => {
+  req.logout((err) => {
+    if (err) { return next(err); }
+    res.redirect('/');
+  });
+});
 
 
 
