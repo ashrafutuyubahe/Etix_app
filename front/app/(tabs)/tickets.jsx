@@ -1,18 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
+import { useRoute } from '@react-navigation/native';
 
 const Tickets = () => {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const route = useRoute();
+  const { origin, destination, agency } = route.params;
+
 
   useEffect(() => {
     const API_URL = 'http://192.168.43.76:2000/findTickets';
     const requestBody = {
-      origin: 'muhanga', 
-      destination: 'kigali',
-      agency: 'Horizon'
+      origin,
+      destination,
+      agency,
     };
-
+    console.warn(requestBody);
     fetch(API_URL, {
       method: 'POST',
       headers: {
@@ -41,7 +45,7 @@ const Tickets = () => {
       Alert.alert('Error', 'Failed to fetch tickets. Please try again.');
       setLoading(false);
     });
-  }, []);
+  }, [origin, destination, agency]);
 
   if (loading) {
     return (

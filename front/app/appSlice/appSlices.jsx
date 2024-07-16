@@ -5,7 +5,7 @@ const initialState =
      signupData:[{id:null,name:null,email:null,phone:null,password:null}],
      loginData:[{id:null,email:null,password:null}],
      AgencyloginData:[{id:null,agency:null,email:null,password:null}],
-     orgin : 'Not choosen',
+     origin : 'Not choosen',
      destination: 'Not choosen',
      agency: null,
      travelTimeInformation:null,
@@ -44,7 +44,8 @@ const initialState =
     state.AgencyloginData.push(data)
 }, 
       setOrgina:(state,action)=>{
-        state.orgin = action.payload
+        state.origin = action.payload
+        
       },
       setDestinationa:(state,action)=>{
         state.destination = action.payload
@@ -63,7 +64,7 @@ const initialState =
 
 export const{setOrgina,setDestinationa,setAgency,setTravelTimeInformation,setPymentType,setLoginData,setSignupData,setAgecnyLoginData} = appSlice.actions
 
-export const selectOrgina =(state)=>state.application.orgin
+export const selectOrgina =(state)=>state.application.origin
 export const selectDestinationa =(state)=>state.application.destination
 export const selectAgency =(state)=>state.application.Agency
 export const selectTravelTimeInformation =(state)=>state.application.travelTimeInformation

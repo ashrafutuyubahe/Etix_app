@@ -7,17 +7,16 @@ import { Picker } from '@react-native-picker/picker';
 import { setTravelTimeInformation, setAgency } from '../appSlice/appSlices';
 
 function Booking() {
-  const origin = useSelector((state) => state.orgin);
+  const origin = useSelector((state) => state.origin);
   const destination = useSelector((state) => state.destination);
   const navigator = useNavigation();
   const [agency, setAgencyState] = useState('');
-  const [date, setDate] = useState(new Date());
   const dispatch = useDispatch();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(setTravelTimeInformation(date.toISOString()));
     dispatch(setAgency(agency));
+    navigator.navigate('Tickets', { origin:origin, destination, agency });
   };
 
   return (
@@ -73,7 +72,7 @@ function Booking() {
                 <Picker.Item label="Horizon" value="Horizon" />
                 <Picker.Item label="Litico" value="Litico" />
               </Picker>
-              <TouchableOpacity onPress={() => navigator.navigate('Tickets')}>
+              <TouchableOpacity onPress={handleSubmit}>
                 <View style={styles.findTicketButton}>
                   <Text style={styles.findTicketButtonText}>Find Ticket</Text>
                 </View>
