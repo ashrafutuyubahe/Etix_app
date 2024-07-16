@@ -74,8 +74,11 @@ const LoginScreen = () => {
             { opacity, display: isVisible ? 'flex' : 'none' },
           ]}
         >
-          <TouchableOpacity onPress={() => navigator.navigate('Agency Login')}>
-            <Text style={styles.agencyLoginButton}>Agency login</Text>
+          <TouchableOpacity onPress={() => navigator.navigate('AgencyLogin')}>
+            <Text style={styles.modalButton}>Login as Admin</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigator.navigate('AdminSignup')}>
+            <Text style={styles.modalButton}>Signup as Admin</Text>
           </TouchableOpacity>
         </Animated.View>
         <View style={styles.loginBox}>
@@ -150,24 +153,25 @@ const styles = StyleSheet.create({
   modal: {
     backgroundColor: '#E5EDF0',
     position: 'absolute',
-    width: 400,
-    height: 120,
+    width: 300,
+    height: 200,
     justifyContent: 'center',
     padding: 30,
     borderRadius: 15,
     top: '20%',
-    left: '0%',
+    left: '10%',
   },
-  agencyLoginButton: {
-    width: 260,
+  modalButton: {
+    width: '100%',
     height: 50,
     backgroundColor: '#032B44',
     borderRadius: 5,
     alignItems: 'center',
-    paddingTop: 15,
+    paddingVertical: 15,
     color: 'white',
     fontSize: 18,
     textAlign: 'center',
+    marginBottom: 10,
   },
   loginBox: {
     justifyContent: 'center',
@@ -249,3 +253,13 @@ const styles = StyleSheet.create({
 });
 
 export default LoginScreen;
+
+
+
+
+
+
+
+
+
+

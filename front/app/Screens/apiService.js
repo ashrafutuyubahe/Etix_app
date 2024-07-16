@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://192.168.43.76:2000'; // Replace with your backend server's IP address and port
+const API_URL = 'http://192.168.43.76:2000'; 
 
 export const registerUser = async (userData) => {
   try {
@@ -11,4 +11,4 @@ export const registerUser = async (userData) => {
   }
 };
 
-// Add other API services as needed
+
