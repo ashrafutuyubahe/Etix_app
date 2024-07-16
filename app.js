@@ -5,7 +5,7 @@ const connection = require("./dbconnection");
 const path = require("path");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const User = require("./views/users");
+const User = require("./models/users");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const passport = require("passport");
@@ -31,6 +31,8 @@ const CLIENT_SECRET_ID = "804330";
 const CLIENT_ID = "78dfb2e0-ddf3-4366-b7b5-cafff4739f56";
 const axios = require("axios");
 const Ticket = require("./models/ticketsModel");
+
+  
 
 //cors  configuration
 const allowedOrigins = [
@@ -311,11 +313,11 @@ app.post("/airtel-money-webhook", (req, res) => {
   res.sendStatus(200);
 });
 
-//  add a new ticket
+// Endpoint to add a new ticket
 app.post("/addTickets", async (req, res) => {
-  const { origin, destination, departureTime, agency } = req.body;
+  const { origin, destination, departureTime, agency, price } = req.body;
 
-  if (!origin || !destination || !departureTime || !agency) {
+  if (!origin || !destination || !departureTime || !agency || !price) {
     return res.status(400).json({ error: "All fields are required" });
   }
 
@@ -325,11 +327,13 @@ app.post("/addTickets", async (req, res) => {
       destination,
       departureTime,
       agency,
+      price
     });
 
     await newTicket.save();
-    res.status(201).send("  ticket  added successfully");
+    res.status(201).json({ message: "Ticket added successfully" });
   } catch (error) {
+    console.error("Error adding ticket:", error);
     res.status(500).json({ error: "Server error" });
   }
 });

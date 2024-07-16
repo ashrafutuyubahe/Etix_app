@@ -9,7 +9,7 @@ import { setTravelTimeInformation, setAgency } from '../appSlice/appSlices';
 function Booking() {
   const origin = useSelector((state) => state.orgin);
   const destination = useSelector((state) => state.destination);
-  const navigation = useNavigation();
+  const navigator = useNavigation();
   const [agency, setAgencyState] = useState('');
   const [date, setDate] = useState(new Date());
   const dispatch = useDispatch();
@@ -18,9 +18,6 @@ function Booking() {
     e.preventDefault();
     dispatch(setTravelTimeInformation(date.toISOString()));
     dispatch(setAgency(agency));
-
-    // Navigate to Tickets screen with parameters
-    navigation.navigate('Tickets', { origin, destination, agency, date: date.toISOString() });
   };
 
   return (
@@ -56,7 +53,7 @@ function Booking() {
                 <Text style={styles.infoLabel}>Destination</Text>
                 <Text style={styles.infoValue}>{destination}</Text>
               </View>
-              <TouchableOpacity onPress={() => navigation.navigate('Home')}>
+              <TouchableOpacity onPress={() => navigator.navigate('Home')}>
                 <View style={styles.changeButton}>
                   <Text style={styles.changeButtonText}>Choose or Change</Text>
                 </View>
@@ -76,7 +73,7 @@ function Booking() {
                 <Picker.Item label="Horizon" value="Horizon" />
                 <Picker.Item label="Litico" value="Litico" />
               </Picker>
-              <TouchableOpacity onPress={handleSubmit}>
+              <TouchableOpacity onPress={() => navigator.navigate('Tickets')}>
                 <View style={styles.findTicketButton}>
                   <Text style={styles.findTicketButtonText}>Find Ticket</Text>
                 </View>

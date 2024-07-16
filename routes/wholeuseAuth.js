@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const joi = require("joi");
 const Router = express.Router();
-const User = require("../views/users");
+const User = require("../models/users");
 
 const userSchema = joi.object({
   userName: joi.string().min(3).max(30).required(),
