@@ -30,6 +30,7 @@ const nodemailer = require('nodemailer');
 const CLIENT_SECRET_ID="804330"
 const CLIENT_ID="78dfb2e0-ddf3-4366-b7b5-cafff4739f56";
 const axios = require('axios');
+const Ticket = require('./models/ticketsModel');
 
 
 //cors  configuration
@@ -318,6 +319,54 @@ app.post('/airtel-money-webhook', (req, res) => {
   res.sendStatus(200);
 });
 
+
+
+
+
+//  add a new ticket
+app.post('/addTickets', async (req, res) => {
+  const { origin, destination, departureTime, agency } = req.body;
+
+  if (!origin || !destination || !departureTime || !agency) {
+    return res.status(400).json({ error: 'All fields are required' });
+  }
+
+  try {
+    const newTicket = new Ticket({
+      origin,
+      destination,
+      departureTime,
+      agency
+    });
+    
+    await newTicket.save();
+    res.status(201).send('  ticket  added successfully');
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+
+
+
+// Endpoint to find tickets
+app.post('/findTickets', async (req, res) => {
+  const { origin, destination, agency } = req.body;
+
+  if (!origin || !destination || !agency) {
+    return res.status(400).json({ error: 'Origin, destination, and agency are required' });
+  }
+
+  try {
+    const tickets = await Ticket.find({ origin, destination, agency });
+    if (tickets.length === 0) {
+      return res.status(404).json({ message: 'No tickets found for the specified route and agency' });
+    }
+    res.json(tickets);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 
 
 app.listen(PORT, () => {

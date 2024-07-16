@@ -21,7 +21,8 @@ const dispatch = useDispatch()
 
 const HandleSubmit =(e)=>{
   e.preventDefault()
-  dispatch(setTravelTimeInformation(date))
+  dispatch(setTravelTimeInformation(date.toISOString()));
+
   dispatch(setAgency(agency))
 
 }
@@ -30,7 +31,7 @@ const HandleSubmit =(e)=>{
     <>
            <MapView
        provider={PROVIDER_GOOGLE}
-       mapType='mutedStandard' // remove if not using Google Maps
+       mapType='mutedStandard' 
        style={{height:300}}
 
        initialRegion={{
