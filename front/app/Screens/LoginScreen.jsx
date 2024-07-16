@@ -13,7 +13,7 @@ const LoginScreen = () => {
   const navigator = useNavigation();
   const [isVisible, setIsVisible] = useState(false);
   const opacity = new Animated.Value(0);
-  const dispatch = useDispatch();
+ 
 
   const handleLogin = async () => {
     try {

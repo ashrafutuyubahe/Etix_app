@@ -11,12 +11,16 @@ function Booking() {
   const destination = useSelector((state) => state.destination);
   const navigation = useNavigation();
   const [agency, setAgencyState] = useState('');
+  const [date, setDate] = useState(new Date());
   const dispatch = useDispatch();
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    dispatch(setTravelTimeInformation(date.toISOString()));
     dispatch(setAgency(agency));
-    navigation.navigate('Tickets', { origin, destination, agency });
+
+    // Navigate to Tickets screen with parameters
+    navigation.navigate('Tickets', { origin, destination, agency, date: date.toISOString() });
   };
 
   return (

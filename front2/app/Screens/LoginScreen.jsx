@@ -17,13 +17,13 @@ const LoginScreen = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('http://localhost:2000/userlogin/user', {
+      const response = await axios.post('http://192.168.43.76:2000/userAuth/userlogin', {
         userEmail: email,
         userPassword: password
       });
 
       if (response.data.message === 'Logged in successfully') {
-        dispatch(setLoginData([email, password]));
+        
         setEmail('');
         setPassword('');
         navigator.navigate('Test');

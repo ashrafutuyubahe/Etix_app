@@ -1,19 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, ScrollView, SafeAreaView, ActivityIndicator, Alert, TouchableOpacity } from 'react-native';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { StyleSheet, Text, View, ScrollView, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
 
 const Tickets = () => {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
-  const route = useRoute();
-  const navigation = useNavigation();
-
-  const { origin, destination, agency } = route.params;
 
   useEffect(() => {
     const API_URL = 'http://192.168.43.76:2000/findTickets';
-    const requestBody = { origin, destination, agency };
-   
+    const requestBody = {
+      origin: 'muhanga', 
+      destination: 'kigali',
+      agency: 'Horizon'
+    };
+
     fetch(API_URL, {
       method: 'POST',
       headers: {
@@ -42,19 +41,7 @@ const Tickets = () => {
       Alert.alert('Error', 'Failed to fetch tickets. Please try again.');
       setLoading(false);
     });
-  }, [origin, destination, agency]);
-
-  const handleBuyTicket = () => {
-    Alert.alert(
-      "Choose Payment Method",
-      "Please select your payment method",
-      [
-        { text: "MTN", onPress: () => navigation.navigate('Payment', { method: 'MTN' }) },
-        { text: "Airtel", onPress: () => navigation.navigate('Payment', { method: 'Airtel' }) }
-      ],
-      { cancelable: true }
-    );
-  };
+  }, []);
 
   if (loading) {
     return (
@@ -80,11 +67,7 @@ const Tickets = () => {
                 <Text style={styles.cardText}>Destination: {ticket.destination}</Text>
                 <Text style={styles.cardText}>Agency: {ticket.agency}</Text>
                 <Text style={styles.cardText}>Departure Time: {new Date(ticket.departureTime).toLocaleString()}</Text>
-                <TouchableOpacity onPress={handleBuyTicket}>
-                  <View style={styles.buyButton}>
-                    <Text style={styles.buyButtonText}>Buy Ticket</Text>
-                  </View>
-                </TouchableOpacity>
+                <Text style={styles.buyButton}>Buy Ticket</Text>
               </View>
             ))
           )}
@@ -94,8 +77,6 @@ const Tickets = () => {
   );
 };
 
-export default Tickets;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -103,52 +84,46 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: '#032B44',
-    height: 70,
+    height: 150,
     justifyContent: 'center',
     alignItems: 'center',
   },
   headerText: {
     color: 'white',
-    fontSize: 37,
+    fontSize: 27,
     fontWeight: '900',
   },
   scrollView: {
-    paddingHorizontal: 25,
-    paddingTop: 5,
+    paddingVertical: 20,
+    paddingHorizontal: 10,
   },
   card: {
     backgroundColor: 'white',
-    borderRadius: 20,
+    borderRadius: 10,
     padding: 20,
-    marginBottom: 20,
+    marginBottom: 15,
+    elevation: 3,
   },
   cardText: {
-    fontSize: 17,
-    fontWeight: '600',
-    marginBottom: 5,
-    color: '#032B44',
+    fontSize: 16,
+    marginBottom: 10,
   },
   buyButton: {
-    backgroundColor: '#032B44',
-    borderRadius: 15,
-    padding: 10,
-    alignItems: 'center',
+    alignSelf: 'flex-end',
+    color: '#032B44',
+    fontWeight: 'bold',
     marginTop: 10,
   },
-  buyButtonText: {
-    color: 'white',
-    fontSize: 20,
-    fontWeight: '700',
-  },
   noTicketsText: {
-    textAlign: 'center',
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#032B44',
+    alignSelf: 'center',
     marginTop: 20,
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   loading: {
     justifyContent: 'center',
     alignItems: 'center',
   },
 });
+
+export default Tickets;

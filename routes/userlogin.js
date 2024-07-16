@@ -1,18 +1,14 @@
-
 const express = require("express");
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const Router = express.Router();
-const User = require("../models/users");
-const connection= require('../dbconnection');
-const mongoose= require('mongoose');
+const User = require("../views/users");
+const connection = require("../dbconnection");
+const mongoose = require("mongoose");
 const SECRET_KEY = process.env.SECRET_KEY || "your_secret_key";
 
-
-
-
 Router.post("/userlogin", async (req, res) => {
-   console.log(req.body);
+  console.log(req.body);
   try {
     const { userEmail, userPassword } = req.body;
 
@@ -33,12 +29,10 @@ Router.post("/userlogin", async (req, res) => {
 
     res
       .header("Authorization", "Bearer " + token)
-      .json({ message:'Logged in successfully' });
+      .json({ message: "Logged in successfully" });
   } catch (err) {
     res.status(500).json({ error: "Internal server error" });
   }
+});
 
- });
-
- module.exports= Router;
-
+module.exports = Router;

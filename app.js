@@ -1,71 +1,65 @@
 require("dotenv").config();
 const express = require("express");
 const joi = require("joi");
-const connection= require('./dbconnection');
-const path = require('path');
+const connection = require("./dbconnection");
+const path = require("path");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const User = require("./models/users");
+const User = require("./views/users");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
-const userlogin= require('./routes/userlogin');
-const AdminLogin= require('./routes/adminAuth');
+const userlogin = require("./routes/userlogin");
+const AdminLogin = require("./routes/adminAuth");
 const Admin = require("./models/admin");
 const authenticateToken = require("./middlewares/userAuth");
 const wholeUserAuth = require("./routes/wholeuseAuth");
-const cors = require('cors');
+const cors = require("cors");
 const app = express();
 const PORT = process.env.PORT || 3000;
 const SECRET_KEY = process.env.SECRET_KEY || "your_secret_key";
-const  sendSMS= require('./msgconfig');
+const sendSMS = require("./msgconfig");
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-app.use(express.static(path.join(__dirname, 'public')));
-const nodemailer = require('nodemailer');
-const CLIENT_SECRET_ID="804330"
-const CLIENT_ID="78dfb2e0-ddf3-4366-b7b5-cafff4739f56";
-const axios = require('axios');
-const Ticket = require('./models/ticketsModel');
-
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+app.use(express.static(path.join(__dirname, "public")));
+const nodemailer = require("nodemailer");
+const CLIENT_SECRET_ID = "804330";
+const CLIENT_ID = "78dfb2e0-ddf3-4366-b7b5-cafff4739f56";
+const axios = require("axios");
+const Ticket = require("./models/ticketsModel");
 
 //cors  configuration
 const allowedOrigins = [
-  'http://localhost:19006', 
-  'exp://127.0.0.1:19000', 
-  'exp://192.168.43.76:8081', 
+  "http://localhost:19006",
+  "exp://127.0.0.1:19000",
+  "exp://192.168.43.76:8081",
 ];
-
 
 const corsOptions = {
   origin: (origin, callback) => {
-   
     if (!origin) return callback(null, true);
     if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified origin.';
+      const msg =
+        "The CORS policy for this site does not allow access from the specified origin.";
       return callback(new Error(msg), false);
     }
     return callback(null, true);
-  }
+  },
 };
 
 app.use(cors(corsOptions));
 
-
-
-
-
 //email sending logic
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: "gmail",
   auth: {
-    user:"ashraftuyubahe001@gmail.com",
-    pass:"mbpy qfhl vsmj twf"
-  }
+    user: "ashraftuyubahe001@gmail.com",
+    pass: "mbpy qfhl vsmj twf",
+  },
 });
 
 const sendEmail = async (to, subject, text) => {
@@ -73,18 +67,18 @@ const sendEmail = async (to, subject, text) => {
     from: "ashraftuyubahe001@gmail.com",
     to: to,
     subject: subject,
-    text: text
+    text: text,
   };
 
   try {
     const info = await transporter.sendMail(mailOptions);
-    return { success: true, message: 'Email sent: ' + info.response };
+    return { success: true, message: "Email sent: " + info.response };
   } catch (error) {
-    return { success: false, error: 'Error sending email: ' + error };
+    return { success: false, error: "Error sending email: " + error };
   }
 };
 
-app.post('/send-email', async (req, res) => {
+app.post("/send-email", async (req, res) => {
   const { to, subject, text } = req.body;
 
   const result = await sendEmail(to, subject, text);
@@ -94,12 +88,6 @@ app.post('/send-email', async (req, res) => {
     res.status(500).json({ error: result.error });
   }
 });
-
-
-
-
-
-
 
 app.use(
   session({
@@ -148,50 +136,46 @@ passport.deserializeUser(async (id, done) => {
   done(null, user);
 });
 
-
 // Routes
-app.get('/', (req, res) => {
-  res.render('landing');
+app.get("/", (req, res) => {
+  res.render("landing");
 });
 
-app.get('/login', (req, res) => {
-  res.render('login');
+app.get("/login", (req, res) => {
+  res.render("login");
 });
 
-app.get('/dash', (req, res) => {
-  res.render('dashboard');
+app.get("/dash", (req, res) => {
+  res.render("dashboard");
 });
 
-app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+app.get(
+  "/auth/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
 
-app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
-  res.redirect('/login');
-});
+app.get(
+  "/auth/google/callback",
+  passport.authenticate("google", { failureRedirect: "/login" }),
+  (req, res) => {
+    res.redirect("/login");
+  }
+);
 
-app.get('/logout', (req, res) => {
+app.get("/logout", (req, res) => {
   req.logout((err) => {
-    if (err) { return next(err); }
-    res.redirect('/');
+    if (err) {
+      return next(err);
+    }
+    res.redirect("/");
   });
 });
 
+app.use("/user", wholeUserAuth);
+app.use("/userAuth", userlogin);
+app.use("/adminAuth", AdminLogin);
 
-
-
-app.use('/user', wholeUserAuth);
-app.use('/userAuth',userlogin);
-app.use('/adminAuth',AdminLogin);
-
-
-app.use('/user/send-message/',sendSMS)
-
-
-
-
-
-
-
-
+app.use("/user/send-message/", sendSMS);
 
 //admin authenticaton
 
@@ -216,10 +200,8 @@ app.post("/adminRegister", async (req, res) => {
       return res.status(400).json({ error: "Admin already exists" });
     }
 
-    
     const hashedPassword = await bcrypt.hash(adminPassword, 10);
 
-  
     const newAdmin = new Admin({
       adminName,
       adminEmail,
@@ -234,101 +216,107 @@ app.post("/adminRegister", async (req, res) => {
   }
 });
 
-
-
 app.get("/userDashboard", authenticateToken, (req, res) => {
   res
     .status(200)
     .json({ message: "This is a protected route", user: req.user });
 });
 
-
-
-
-
-
-
-
 const getAccessToken = async () => {
   try {
-    const response = await axios.post('https://openapi.airtel.africa/auth/oauth2/token', {
-      client_id: CLIENT_ID,
-      client_secret: CLIENT_SECRET_ID,
-      grant_type: 'client_credentials'
-    }, {
-      headers: {
-        'Content-Type': 'application/json'
+    const response = await axios.post(
+      "https://openapi.airtel.africa/auth/oauth2/token",
+      {
+        client_id: CLIENT_ID,
+        client_secret: CLIENT_SECRET_ID,
+        grant_type: "client_credentials",
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
       }
-    });
+    );
     return response.data.access_token;
   } catch (error) {
-    console.error('Failed to get access token:', error.response ? error.response.data : error.message);
+    console.error(
+      "Failed to get access token:",
+      error.response ? error.response.data : error.message
+    );
     throw error;
   }
 };
 
 // Function to initiate payment
-const initiateAirtelMoneyPayment = async (phoneNumber, amount, companyAccount) => {
+const initiateAirtelMoneyPayment = async (
+  phoneNumber,
+  amount,
+  companyAccount
+) => {
   try {
     const accessToken = await getAccessToken();
-    const response = await axios.post('https://openapi.airtel.africa/merchant/v1/payments/', {
-      reference: 'unique_transaction_reference',
-      subscriber: {
-        country: 'RWA', // replace with the country code if different
-        currency: 'RWF',
-        msisdn: phoneNumber
+    const response = await axios.post(
+      "https://openapi.airtel.africa/merchant/v1/payments/",
+      {
+        reference: "unique_transaction_reference",
+        subscriber: {
+          country: "RWA", // replace with the country code if different
+          currency: "RWF",
+          msisdn: phoneNumber,
+        },
+        transaction: {
+          amount: amount,
+          country: "RWA", // replace with the country code if different
+          currency: "RWF",
+        },
+        companyAccount: companyAccount,
       },
-      transaction: {
-        amount: amount,
-        country: 'RWA', // replace with the country code if different
-        currency: 'RWF',
-      },
-      companyAccount: companyAccount
-    }, {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
       }
-    });
+    );
 
-    console.log('Payment successful:', response.data);
+    console.log("Payment successful:", response.data);
     return response.data;
   } catch (error) {
-    console.error('Payment failed:', error.response ? error.response.data : error.message);
+    console.error(
+      "Payment failed:",
+      error.response ? error.response.data : error.message
+    );
     throw error;
   }
 };
 
-
-
-
-app.post('/pay', async (req, res) => {
+app.post("/pay", async (req, res) => {
   const { phoneNumber, amount, companyAccount } = req.body;
   try {
-    const paymentResponse = await initiateAirtelMoneyPayment(phoneNumber, amount, companyAccount);
+    const paymentResponse = await initiateAirtelMoneyPayment(
+      phoneNumber,
+      amount,
+      companyAccount
+    );
     res.status(200).json(paymentResponse);
   } catch (error) {
-    res.status(500).send('Payment initiation failed');
+    res.status(500).send("Payment initiation failed");
   }
 });
 
-app.post('/airtel-money-webhook', (req, res) => {
+app.post("/airtel-money-webhook", (req, res) => {
   const paymentStatus = req.body;
-  console.log('Payment status received:', paymentStatus);
-  
+  console.log("Payment status received:", paymentStatus);
+
   res.sendStatus(200);
 });
 
-
-
-
-
 //  add a new ticket
-app.post('/addTickets', async (req, res) => {
+app.post("/addTickets", async (req, res) => {
   const { origin, destination, departureTime, agency } = req.body;
 
   if (!origin || !destination || !departureTime || !agency) {
-    return res.status(400).json({ error: 'All fields are required' });
+    return res.status(400).json({ error: "All fields are required" });
   }
 
   try {
@@ -336,38 +324,40 @@ app.post('/addTickets', async (req, res) => {
       origin,
       destination,
       departureTime,
-      agency
+      agency,
     });
-    
+
     await newTicket.save();
-    res.status(201).send('  ticket  added successfully');
+    res.status(201).send("  ticket  added successfully");
   } catch (error) {
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: "Server error" });
   }
 });
 
-
-
-
 // Endpoint to find tickets
-app.post('/findTickets', async (req, res) => {
+app.post("/findTickets", async (req, res) => {
   const { origin, destination, agency } = req.body;
 
   if (!origin || !destination || !agency) {
-    return res.status(400).json({ error: 'Origin, destination, and agency are required' });
+    return res
+      .status(400)
+      .json({ error: "Origin, destination, and agency are required" });
   }
 
   try {
     const tickets = await Ticket.find({ origin, destination, agency });
     if (tickets.length === 0) {
-      return res.status(404).json({ message: 'No tickets found for the specified route and agency' });
+      return res
+        .status(404)
+        .json({
+          message: "No tickets found for the specified route and agency",
+        });
     }
     res.json(tickets);
   } catch (error) {
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: "Server error" });
   }
 });
-
 
 app.listen(PORT, () => {
   console.log(`The app is running on port ${PORT}`);

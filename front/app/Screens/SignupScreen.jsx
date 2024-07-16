@@ -33,7 +33,7 @@ const SignupScreen = () => {
         Alert.alert('Error', 'User registration failed');
       }
     } catch (error) {
-      Alert.alert('Error', error.response?.data?.error || 'Internal server error');
+      Alert.alert('Error', error.response?.data?.error );
     } finally {
       setLoading(false);
     }

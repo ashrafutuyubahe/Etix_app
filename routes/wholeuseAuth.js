@@ -1,11 +1,9 @@
 const express = require("express");
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const joi = require("joi");
 const Router = express.Router();
-const User = require("../models/users");
-
-
+const User = require("../views/users");
 
 const userSchema = joi.object({
   userName: joi.string().min(3).max(30).required(),
@@ -22,11 +20,15 @@ Router.post("/userRegister", async (req, res) => {
   }
 
   try {
-    const { userName, userEmail,userPassword,userPhoneNumber } = req.body;
+    const { userName, userEmail, userPassword, userPhoneNumber } = req.body;
 
     const existingUser = await User.findOne({ userEmail });
     if (existingUser) {
-      return res.status(400).json({ error: "User already exists. please Register with other credentials" });
+      return res
+        .status(400)
+        .json({
+          error: "User already exists. please Register with other credentials",
+        });
     }
 
     const hashedPassword = await bcrypt.hash(userPassword, 10);
@@ -35,20 +37,18 @@ Router.post("/userRegister", async (req, res) => {
       userName,
       userEmail,
       userPassword: hashedPassword,
-      userPhoneNumber
+      userPhoneNumber,
     });
-   
- const saveUser= await newUser.save();
 
+    const saveUser = await newUser.save();
 
-    if (saveUser){
+    if (saveUser) {
       return res.status(201).json({ message: "User registered successfully" });
     }
     return res.status(404).json({ message: "User registration failed" });
-  } catch (err){
+  } catch (err) {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
 
 module.exports = Router;
