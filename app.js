@@ -11,6 +11,7 @@ const session = require("express-session");
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const userlogin= require('./routes/userlogin');
+const AdminLogin= require('./routes/adminAuth');
 const Admin = require("./models/admin");
 const authenticateToken = require("./middlewares/userAuth");
 const wholeUserAuth = require("./routes/wholeuseAuth");
@@ -176,8 +177,11 @@ app.get('/logout', (req, res) => {
 
 
 
-app.use('/', wholeUserAuth);
-app.use('/userlogin/',userlogin)
+app.use('/user', wholeUserAuth);
+app.use('/userAuth',userlogin);
+app.use('/adminAuth',AdminLogin);
+
+
 app.use('/user/send-message/',sendSMS)
 
 
@@ -211,10 +215,10 @@ app.post("/adminRegister", async (req, res) => {
       return res.status(400).json({ error: "Admin already exists" });
     }
 
-    // Hash the password
+    
     const hashedPassword = await bcrypt.hash(adminPassword, 10);
 
-    // Create new user
+  
     const newAdmin = new Admin({
       adminName,
       adminEmail,
@@ -229,35 +233,7 @@ app.post("/adminRegister", async (req, res) => {
   }
 });
 
-app.post("/adminLogin", async (req, res) => {
-  try {
-    const { adminEmail, adminPassword } = req.body;
 
-    const admin = await Admin.findOne({ adminEmail });
-
-    if (!admin) {
-      return res.status(400).json({ error: "Invalid email or password" });
-    }
-
-    const validPassword = await bcrypt.compare(
-      adminPassword,
-      admin.adminPassword
-    );
-    if (!validPassword) {
-      return res.status(400).json({ error: "Invalid email or password" });
-    }
-
-    const token = jwt.sign({ adminId: admin._id }, SECRET_KEY, {
-      expiresIn: "1h",
-    });
-
-    res
-      .header("Authorization", "Bearer " + token)
-      .json({ message: "Logged in successfully" });
-  } catch (err) {
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
 
 app.get("/userDashboard", authenticateToken, (req, res) => {
   res

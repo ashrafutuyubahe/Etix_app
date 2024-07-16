@@ -13,10 +13,10 @@ const SignupScreen = () => {
   const navigator = useNavigation();
 
   const handleSignup = async () => {
-    setLoading(true);
+    setLoading(true);  
 
     try {
-      const response = await axios.post('http://192.168.43.76:2000/userRegister', {
+      const response = await axios.post('http://192.168.43.76:2000/user/userRegister', {
         userName: name,
         userEmail: email,
         userPassword: password,
@@ -24,7 +24,7 @@ const SignupScreen = () => {
       });
 
       if (response.status === 201) {
-        Alert.alert('Success', 'YOU are now  registered...');
+        Alert.alert('Success', 'You are now  registered, Please Login');
         setName('');
         setEmail('');
         setPhone('');

@@ -3,7 +3,7 @@ import { SafeAreaView, View, Image, Animated, Text, TextInput, TouchableOpacity,
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
-import { setLoginData } from './AgencyLogin'; // updated import
+import { setLoginData } from './AgencyLogin';
 
 import axios from 'axios';
 
@@ -17,13 +17,13 @@ const LoginScreen = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('http://localhost:2000/userlogin/user', {
+      const response = await axios.post('http://192.168.43.76:2000/userAuth/userlogin', {
         userEmail: email,
         userPassword: password
       });
 
-      if (response.data.message === 'Logged in successfully') {
-        dispatch(setLoginData([email, password]));
+      if (response.status === 200) {
+        // dispatch(setLoginData([email, password]));
         setEmail('');
         setPassword('');
         navigator.navigate('Test');
