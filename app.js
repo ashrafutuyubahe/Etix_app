@@ -441,15 +441,87 @@ app.post("/getYourBoughtTicket", async (req, res) => {
   }
 });
 
-app.post('/scanTicket',async(req,res)=>{
-  try{
-  
 
-  }catch(error){
-    console.error("Error scanning QR code ", err);
-    res.status(500).json({ error: "Failed to scan ticket" });
+app.post('/scanTicket', async (req, res) => {
+  try {
+    const { ticketId, userName, paymentStatus} = req.body;
+
+
+    if (!ticketId || !userName || !paymentStatus) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+
+
+    const ticket = await BoughtTicket.findOne({ ticketId, userName });
+
+    if (!ticket) {
+      return res.status(404).json({ error: 'Ticket not found' });
+    }
+
+
+    if (ticket.paymentStatus !== paymentStatus) {
+      return res.status(400).json({ error: 'Ticket payment status does not match' });
+    }
+
+    
+    res.status(200).json({
+      message: 'Ticket is valid and paid',
+   });
+  } catch (err) {
+    res.status(500).json({ error: 'Internal server error' });
   }
-})
+});
+
+
+
+
+app.post('/addBoughtTickets', async (req, res) => {
+  try {
+    const {
+      ticketId,
+      userName,
+      origin,
+      destination,
+      price,
+      departureTime,
+      arrivalTime,
+      paymentStatus,
+      qrCode,
+      vehicleNumber,
+      agency
+    } = req.body;
+
+   
+    if (!ticketId || !userName || !origin || !destination || !price || !departureTime || !arrivalTime) {
+      return res.status(400).json({ error: 'All required fields must be provided' });
+    }
+
+    
+    const newTicket = new BoughtTicket({
+      ticketId,
+      userName,
+      origin,
+      destination,
+      price,
+      departureTime,
+      arrivalTime,
+      paymentStatus: paymentStatus || 'pending', 
+      qrCode,
+      vehicleNumber,
+      agency
+    });
+
+    
+    await newTicket.save();
+
+    
+    res.status(201).json({ message: 'Ticket added successfully', ticket: newTicket });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`The app is running on port ${PORT}`);
