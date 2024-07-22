@@ -441,6 +441,16 @@ app.post("/getYourBoughtTicket", async (req, res) => {
   }
 });
 
+app.post('/scanTicket',async(req,res)=>{
+  try{
+  
+
+  }catch(error){
+    console.error("Error scanning QR code ", err);
+    res.status(500).json({ error: "Failed to scan ticket" });
+  }
+})
+
 app.listen(PORT, () => {
   console.log(`The app is running on port ${PORT}`);
 });

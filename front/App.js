@@ -6,6 +6,7 @@ import { NavigationContainer } from '@react-navigation/native'
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Landing from './app/Screens/Landing';
 import LoginScreen from './app/Screens/LoginScreen';
+import DriverDashboard from './app/Screens/DriverDashboardScreen';
 import SignupScreen from './app/Screens/SignupScreen';
 import { Provider } from 'react-redux';
 import { store } from './app/store/store';
@@ -25,6 +26,7 @@ export default function App() {
       <SafeAreaProvider >
       <Stack.Navigator>
         <Stack.Screen name="Landing" options={{headerShown:false}} component={Landing} />
+        <Stack.Screen name="DriverDashboard" component={DriverDashboardScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name='Signup' component={SignupScreen} />
         <Stack.Screen name='Test' options={{headerShown:false}} component={Test} />
