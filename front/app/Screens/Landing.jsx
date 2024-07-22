@@ -14,7 +14,7 @@ const Landing = ()=>{
   useEffect(() => {
     const timer = setTimeout(() => {
       setCount(1);
-    }, 5000); // 1000ms = 1 second
+    }, 5000); 
 
     return () => clearTimeout(timer);
     

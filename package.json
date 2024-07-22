@@ -28,6 +28,7 @@
     "nodemon": "^3.1.4",
     "passport": "^0.7.0",
     "passport-google-oauth": "^2.0.0",
-    "twilio": "^5.2.2"
+    "twilio": "^5.2.2",
+    "uuid": "^10.0.0"
   }
 }

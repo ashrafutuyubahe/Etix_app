@@ -31,16 +31,15 @@ const CLIENT_SECRET_ID = "804330";
 const CLIENT_ID = "78dfb2e0-ddf3-4366-b7b5-cafff4739f56";
 const axios = require("axios");
 const Ticket = require("./models/ticketsModel");
-
-  
-
+const BoughtTicket = require("./models/boughtTicketModel");
+const { v4: uuidv4 } = require('uuid');
 
 const allowedOrigins = [
   "http://localhost:19006",
   "exp://127.0.0.1:19000",
   "exp://192.168.43.76:8081",
   "exp://192.168.8.102:8081",
-  "exp://192.168.43.76:8082"
+  "exp://192.168.43.76:8082",
 ];
 
 const corsOptions = {
@@ -264,13 +263,13 @@ const initiateAirtelMoneyPayment = async (
       {
         reference: "unique_transaction_reference",
         subscriber: {
-          country: "RWA", // replace with the country code if different
+          country: "RWA", 
           currency: "RWF",
           msisdn: phoneNumber,
         },
         transaction: {
           amount: amount,
-          country: "RWA", // replace with the country code if different
+          country: "RWA", 
           currency: "RWF",
         },
         companyAccount: companyAccount,
@@ -315,7 +314,7 @@ app.post("/airtel-money-webhook", (req, res) => {
   res.sendStatus(200);
 });
 
-// Endpoint to add a new ticket
+
 app.post("/addTickets", async (req, res) => {
   const { origin, destination, departureTime, agency, price } = req.body;
 
@@ -329,7 +328,7 @@ app.post("/addTickets", async (req, res) => {
       destination,
       departureTime,
       agency,
-      price
+      price,
     });
 
     await newTicket.save();
@@ -340,7 +339,7 @@ app.post("/addTickets", async (req, res) => {
   }
 });
 
-// Endpoint to find tickets
+
 app.post("/findTickets", async (req, res) => {
   const { origin, destination, agency } = req.body;
 
@@ -353,11 +352,9 @@ app.post("/findTickets", async (req, res) => {
   try {
     const tickets = await Ticket.find({ origin, destination, agency });
     if (tickets.length === 0) {
-      return res
-        .status(404)
-        .json({
-          message: "No tickets found for the specified route and agency",
-        });
+      return res.status(404).json({
+        message: "No tickets found for the specified route and agency",
+      });
     }
     res.json(tickets);
   } catch (error) {
@@ -365,26 +362,94 @@ app.post("/findTickets", async (req, res) => {
   }
 });
 
-
-
-
-
-const QRCode = require('qrcode');
-app.get('/getQRcode', async (req, res) => {
-    try{ 
-    
+const QRCode = require("qrcode");
+app.get("/getQRcode", async (req, res) => {
+  try {
     const dataObject = req.body;
 
-    
-    const dataString = JSON.stringify(dataObject); 
+    const dataString = JSON.stringify(dataObject);
     const qrCodeUrl = await QRCode.toDataURL(dataString);
-  
+
     res.send(`<img src="${qrCodeUrl}" alt="QR Code">`);
   } catch (err) {
-    res.status(500).send('Error generating QR code');
+    res.status(500).send("Error generating QR code");
   }
 });
 
+
+app.get("/getYourBoughtTicket", async (req, res) => {
+  const {
+    userName,
+    origin,
+    destination,
+    price,
+    departureTime,
+    arrivalTime,
+    vehicleNumber,
+    paymentStatus,
+    agency,
+  } = req.body;
+
+
+  if (
+    !userName ||
+    !origin ||
+    !destination ||
+    !price ||
+    !departureTime ||
+    !arrivalTime ||
+    !vehicleNumber ||
+    !agency
+  ) {
+    return res.status(400).json({ error: "All fields are required" });
+  }
+
+  
+  const ticketId = uuidv4();
+
+  
+  const newTicket = new BoughtTicket({
+    ticketId,
+    userName,
+    origin,
+    destination,
+    price,
+    departureTime,
+    arrivalTime,
+    vehicleNumber,
+    agency,
+    paymentStatus,
+  });
+
+  
+  const qrData = {
+    ticketId: newTicket.ticketId,
+    userName: newTicket.userName,
+    paymentStatus: newTicket.paymentStatus,
+  };
+
+  const qrString = JSON.stringify(qrData);
+
+  try {
+   
+    newTicket.qrCode = await QRCode.toDataURL(qrString);
+
+  
+    const savedTicket = await newTicket.save();
+
+    
+    if (!savedTicket) {
+      return res.status(500).json({ error: "Failed to save your bought ticket" });
+    }
+
+  
+    res.status(201).json(newTicket);
+
+  } catch (err) {
+    console.error("Error generating QR code or saving ticket:", err);
+    res.status(500).json({ error: "Failed to generate ticket" });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`The app is running on port ${PORT}`);
