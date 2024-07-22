@@ -21,7 +21,7 @@ const Notification = () => {
 
     try {
       const response = await fetch('http://192.168.43.76:2000/getYourBoughtTicket', {
-        method: 'POST', // Changed to POST for sending data
+        method: 'POST', 
         headers: {
           'Content-Type': 'application/json',
         },
@@ -108,7 +108,7 @@ const Notification = () => {
             value={agency}
             onChangeText={setAgency}
           />
-          <Button title={loading ? 'Submitting...' : 'Submit'} onPress={handleSubmit} disabled={loading} />
+          <Button title={loading ? 'Generating Ticket...' : 'Get Ticket'} onPress={handleSubmit} disabled={loading} />
         </View>
         {error ? (
           <View style={styles.errorContainer}>
@@ -193,8 +193,8 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   qrCodeImage: {
-    width: 100,
-    height: 100,
+    width: 300,
+    height: 200,
     marginTop: 10,
   },
   errorContainer: {

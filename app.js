@@ -11,8 +11,8 @@ const session = require("express-session");
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const userlogin = require("./routes/userlogin");
-const AdminLogin = require("./routes/adminAuth");
-const Admin = require("./models/admin");
+const driverLogin = require("./routes/Driverauth");
+const Driver = require("./models/driverModel");
 const authenticateToken = require("./middlewares/userAuth");
 const wholeUserAuth = require("./routes/wholeuseAuth");
 const cors = require("cors");
@@ -32,7 +32,7 @@ const CLIENT_ID = "78dfb2e0-ddf3-4366-b7b5-cafff4739f56";
 const axios = require("axios");
 const Ticket = require("./models/ticketsModel");
 const BoughtTicket = require("./models/boughtTicketModel");
-const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4 } = require("uuid");
 
 const allowedOrigins = [
   "http://localhost:19006",
@@ -176,44 +176,44 @@ app.get("/logout", (req, res) => {
 
 app.use("/user", wholeUserAuth);
 app.use("/userAuth", userlogin);
-app.use("/adminAuth", AdminLogin);
+app.use("/driverAuth", driverLogin);
 
 app.use("/user/send-message/", sendSMS);
 
 //admin authenticaton
 
-const adminSchema = joi.object({
-  adminName: joi.string().min(3).max(30).required(),
-  adminEmail: joi.string().email().required(),
-  adminPassword: joi.string().min(6).required(),
+const driverSchema = joi.object({
+  driverName: joi.string().min(3).max(30).required(),
+  driverPassword: joi.string().required(),
+   driverCar: joi.string().required(),
 });
 
-app.post("/adminRegister", async (req, res) => {
-  const { error } = adminSchema.validate(req.body);
+app.post("/AddDrivers", async (req, res) => {
+  const { error } = driverSchema.validate(req.body);
 
   if (error) {
     return res.status(400).json({ error: error.details[0].message });
   }
 
   try {
-    const { adminName, adminEmail, adminPassword: adminPassword } = req.body;
+    const { driverName, driverPassword,driverCar } = req.body;
 
-    const existingAdmin = await Admin.findOne({ adminEmail });
-    if (existingAdmin) {
-      return res.status(400).json({ error: "Admin already exists" });
+    const existingDriver = await Driver.findOne({driverName});
+    if (existingDriver) {
+      return res.status(400).json({ error: "Driver with that email already exists" });
     }
 
-    const hashedPassword = await bcrypt.hash(adminPassword, 10);
+    const hashedPassword = await bcrypt.hash(driverPassword, 10);
 
-    const newAdmin = new Admin({
-      adminName,
-      adminEmail,
-      adminPassword: hashedPassword,
+    const newDriver = new Driver({
+      driverName,
+      driverPassword:hashedPassword,
+      driverCar,
     });
 
-    if (await newAdmin.save())
-      return res.status(201).json({ message: "Admin registered successfully" });
-    return res.status(404).json({ message: "Admin registration failed" });
+    if (await newDriver.save())
+      return res.status(201).json({ message: "Driver has been added successfully" });
+    return res.status(404).json({ message: "failed to add new Driver" });
   } catch (err) {
     res.status(500).json({ error: "Internal server error" });
   }
@@ -263,13 +263,13 @@ const initiateAirtelMoneyPayment = async (
       {
         reference: "unique_transaction_reference",
         subscriber: {
-          country: "RWA", 
+          country: "RWA",
           currency: "RWF",
           msisdn: phoneNumber,
         },
         transaction: {
           amount: amount,
-          country: "RWA", 
+          country: "RWA",
           currency: "RWF",
         },
         companyAccount: companyAccount,
@@ -314,7 +314,6 @@ app.post("/airtel-money-webhook", (req, res) => {
   res.sendStatus(200);
 });
 
-
 app.post("/addTickets", async (req, res) => {
   const { origin, destination, departureTime, agency, price } = req.body;
 
@@ -338,7 +337,6 @@ app.post("/addTickets", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
-
 
 app.post("/findTickets", async (req, res) => {
   const { origin, destination, agency } = req.body;
@@ -376,8 +374,7 @@ app.get("/getQRcode", async (req, res) => {
   }
 });
 
-
-app.get("/getYourBoughtTicket", async (req, res) => {
+app.post("/getYourBoughtTicket", async (req, res) => {
   const {
     userName,
     origin,
@@ -389,7 +386,6 @@ app.get("/getYourBoughtTicket", async (req, res) => {
     paymentStatus,
     agency,
   } = req.body;
-
 
   if (
     !userName ||
@@ -404,10 +400,8 @@ app.get("/getYourBoughtTicket", async (req, res) => {
     return res.status(400).json({ error: "All fields are required" });
   }
 
-  
   const ticketId = uuidv4();
 
-  
   const newTicket = new BoughtTicket({
     ticketId,
     userName,
@@ -421,7 +415,6 @@ app.get("/getYourBoughtTicket", async (req, res) => {
     paymentStatus,
   });
 
-  
   const qrData = {
     ticketId: newTicket.ticketId,
     userName: newTicket.userName,
@@ -431,20 +424,17 @@ app.get("/getYourBoughtTicket", async (req, res) => {
   const qrString = JSON.stringify(qrData);
 
   try {
-   
     newTicket.qrCode = await QRCode.toDataURL(qrString);
 
-  
     const savedTicket = await newTicket.save();
 
-    
     if (!savedTicket) {
-      return res.status(500).json({ error: "Failed to save your bought ticket" });
+      return res
+        .status(500)
+        .json({ error: "Failed to save your bought ticket" });
     }
 
-  
     res.status(201).json(newTicket);
-
   } catch (err) {
     console.error("Error generating QR code or saving ticket:", err);
     res.status(500).json({ error: "Failed to generate ticket" });
