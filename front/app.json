@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "DoneWithIt",
-    "slug": "DoneWithIt",
+    "name": "ETIX App",
+    "slug": "ETIX-test-mode",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -12,17 +12,30 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "ETIX.android"
+      "package": "ETIX.android",
+      "runtimeVersion": "1.0.0"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "aa6c7b59-c5c1-44d4-9918-fa9e79f349b1"
+      }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/aa6c7b59-c5c1-44d4-9918-fa9e79f349b1",
+      "fallbackToCacheTimeout": 0
     }
   }
 }

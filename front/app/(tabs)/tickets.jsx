@@ -18,7 +18,7 @@ const Tickets = () => {
       destination,
       agency,
     };
-    console.warn(requestBody);
+    
     fetch(API_URL, {
       method: 'POST',
       headers: {
@@ -54,10 +54,10 @@ const Tickets = () => {
   };
 
   const handleConfirmPayment = () => {
-    // Here you would handle the payment confirmation logic
+    
     console.log('Payment Method:', selectedPaymentMethod);
     console.log('Payment Credentials:', paymentCredentials);
-    // Close the modal after confirming payment
+    
     setModalVisible(false);
   };
 

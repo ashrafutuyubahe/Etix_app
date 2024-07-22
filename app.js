@@ -39,6 +39,7 @@ const allowedOrigins = [
   "http://localhost:19006",
   "exp://127.0.0.1:19000",
   "exp://192.168.43.76:8081",
+  "exp://192.168.8.102:8081"
 ];
 
 const corsOptions = {
@@ -362,6 +363,27 @@ app.post("/findTickets", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+
+
+
+
+
+const QRCode = require('qrcode');
+app.get('/getQRcode', async (req, res) => {
+    try{ 
+    
+    const dataObject = req.body;
+
+    
+    const dataString = JSON.stringify(dataObject); 
+    const qrCodeUrl = await QRCode.toDataURL(dataString);
+  
+    res.send(`<img src="${qrCodeUrl}" alt="QR Code">`);
+  } catch (err) {
+    res.status(500).send('Error generating QR code');
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`The app is running on port ${PORT}`);
