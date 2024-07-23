@@ -18,17 +18,24 @@ const DriverDashboard = ({ navigation }) => {
 
   const handleScan = async (e) => {
     try {
+      // Parse the QR code data
       const qrData = JSON.parse(e.data);
+
+      // Make a POST request to the endpoint with the scanned data
       const response = await axios.post('http://192.168.43.76:2000/scanTicket', qrData);
 
       if (response.status === 200) {
+        // If the response is successful, show the success message
         Alert.alert('Success', response.data.message);
       } else {
+        // If the response indicates an error, show the error message
         Alert.alert('Error', response.data.error);
       }
     } catch (error) {
+      // Handle any errors that occur during the request
       Alert.alert('Error', error.response?.data?.error || 'An error occurred');
     }
+    // Close the modal after processing
     setModalVisible(false);
   };
 
