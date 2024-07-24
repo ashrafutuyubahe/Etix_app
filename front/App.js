@@ -26,7 +26,7 @@ export default function App() {
       <SafeAreaProvider >
       <Stack.Navigator>
         <Stack.Screen name="Landing" options={{headerShown:false}} component={Landing} />
-        <Stack.Screen name="DriverDashboard" component={DriverDashboardScreen} />
+        <Stack.Screen name="DriverDashboard" component={DriverDashboard} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name='Signup' component={SignupScreen} />
         <Stack.Screen name='Test' options={{headerShown:false}} component={Test} />

@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import { setLoginData } from './AgencyLogin';
 
+
 import axios from 'axios';
 
 const LoginScreen = () => {
@@ -83,11 +84,11 @@ const LoginScreen = () => {
         </Animated.View>
         <View style={styles.loginBox}>
           <TouchableOpacity style={styles.googleLoginButton}>
-            <Image
+            {/* <Image
               style={styles.googleIcon}
               resizeMode="contain"
-              source={require('../assets/google.png')}
-            />
+              source={GoogleImage}
+            /> */}
             <Text style={styles.googleLoginText}>Login with Google</Text>
           </TouchableOpacity>
           <TextInput

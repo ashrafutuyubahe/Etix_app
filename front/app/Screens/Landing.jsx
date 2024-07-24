@@ -12,6 +12,7 @@ import {
   Alert
 } from 'react-native';
 import LoginScreen from './LoginScreen';
+
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 
@@ -56,15 +57,15 @@ const Landing = () => {
     return (
       <SafeAreaView style={styles.container}>
         <View>
-          <Image
+          {/* <Image
             fadeDuration={2000}
             style={{
               resizeMode: 'contain',
               height: 200,
               width: 200
             }}
-            source={require('../assets/logo.png')}
-          />
+            source={Logo}
+          /> */}
         </View>
         <View>
           <TouchableOpacity>
