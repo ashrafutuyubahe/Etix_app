@@ -36,10 +36,8 @@ const { v4: uuidv4 } = require("uuid");
 
 const allowedOrigins = [
   "http://localhost:19006",
-  "exp://127.0.0.1:19000",
-  "exp://192.168.8.102:8081",
   "exp://192.168.43.76:8081",
-  "exp://192.168.43.76:8082"
+    "exp://192.168.43.76:8082"
 ];
 
 const corsOptions = {
