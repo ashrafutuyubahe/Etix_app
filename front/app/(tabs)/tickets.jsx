@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, ScrollView, SafeAreaView, ActivityIndicator, Alert, Modal, TouchableOpacity, TextInput } from 'react-native';
+import { Easing,StyleSheet, Text, View, ScrollView, SafeAreaView, ActivityIndicator, Alert, Modal, TouchableOpacity, TextInput } from 'react-native';
 import { useRoute } from '@react-navigation/native';
+import { Picker } from '@react-native-picker/picker';
+import { Animated } from 'react-native';
+import { useRef } from 'react';
+import Modal1 from '../components/Modal';
+import { Dimensions } from 'react-native';
+import { Image } from 'react-native';
 
 const Tickets = () => {
   const [tickets, setTickets] = useState([]);
@@ -10,9 +16,43 @@ const Tickets = () => {
   const [paymentCredentials, setPaymentCredentials] = useState('');
   const route = useRoute();
   const { origin, destination, agency } = route.params;
+  const [paymentMethod, setPaymentMethod] = useState('momo'); 
+  const [credentials, setCredentials] = useState('');
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(100)).current;
+  const [name,setName]= useState()
+  
+
+  const closeModal = () => {
+    setModalVisible(false);
+  };
+  const fadeIn = () => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 500,
+      easing: Easing.ease,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const slideIn = () => {
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 500,
+      easing: Easing.ease,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePaymentMethodChange = (method) => {
+    setPaymentMethod(method);
+    setCredentials('');
+    fadeIn();
+    slideIn();
+  };
 
   useEffect(() => {
-    const API_URL = 'http://192.168.43.76:2000/findTickets';
+    const API_URL = 'http://192.168.91.41:3000/findTickets';
     const requestBody = {
       origin,
       destination,
@@ -44,7 +84,7 @@ const Tickets = () => {
     })
     .catch(error => {
       console.error('Error fetching tickets:', error);
-      Alert.alert('Error', 'Failed to fetch tickets. Please try again.');
+      Alert.alert('TICKET NOT FOUND!', 'No tickets found for the specified route and agency.');
       setLoading(false);
     });
   }, [origin, destination, agency]);
@@ -54,10 +94,10 @@ const Tickets = () => {
   };
 
   const handleConfirmPayment = () => {
-    
+    // Here you would handle the payment confirmation logic
     console.log('Payment Method:', selectedPaymentMethod);
     console.log('Payment Credentials:', paymentCredentials);
-    
+    // Close the modal after confirming payment
     setModalVisible(false);
   };
 
@@ -93,51 +133,71 @@ const Tickets = () => {
           )}
         </ScrollView>
       </SafeAreaView>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(!modalVisible);
-        }}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalText}>Select Payment Method</Text>
-            <TouchableOpacity
-              style={styles.paymentOption}
-              onPress={() => setSelectedPaymentMethod('MTN')}
-            >
-              <Text style={styles.paymentOptionText}>MTN</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.paymentOption}
-              onPress={() => setSelectedPaymentMethod('Airtel')}
-            >
-              <Text style={styles.paymentOptionText}>Airtel</Text>
-            </TouchableOpacity>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter Payment Credentials"
-              value={paymentCredentials}
-              onChangeText={setPaymentCredentials}
-              secureTextEntry
+   <Modal1 visible={modalVisible} onClose={closeModal}>
+     <View style={styles.container2}>
+      <Text style={styles.label}>Select Payment Method:</Text>
+   <View style={{justifyContent:'space-around',alignItems:'center',flexDirection:'row'}}>
+   <TouchableOpacity  style={styles.googleLoginButton} onPress={()=>handlePaymentMethodChange('airtel')}>
+            <Image
+              style={{width:400,height:100}}
+              resizeMode="contain"
+              source={require('../assets/airtel.png')}
             />
-            <TouchableOpacity
-              style={styles.confirmButton}
-              onPress={handleConfirmPayment}
-            >
-              <Text style={styles.confirmButtonText}>Confirm Payment</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={() => setModalVisible(!modalVisible)}
-            >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.googleLoginButton} onPress={()=>handlePaymentMethodChange('mtn')}>
+            <Image
+              style={styles.googleIcon}
+              resizeMode="contain"
+              source={require('../assets/MTN.png')}
+            />
+            <Text style={styles.googleLoginText}>MTN</Text>
+          </TouchableOpacity>
+   </View>
+   <View>
+   <TouchableOpacity style={styles.googleLoginButton2} onPress={()=>handlePaymentMethodChange('card')}>
+            <Image
+              style={{width:100,height:90}}
+              resizeMode="contain"
+              source={require('../assets/card.png')}
+            />
+            <Text style={styles.googleLoginText2}>Debit/credit</Text>
+          </TouchableOpacity>
+   </View>
+      <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
+        <View style={{justifyContent:'center',alignItems:'center'}}>
+
+
+        <TextInput
+          style={styles.input2}
+          value={name}
+          onChangeText={(text) => setName(text)}
+          placeholder='Name'
+          
+        />
+        <Text style={{
+    paddingTop:'10%', 
+    fontSize: 23,
+    marginBottom: 10,
+    fontWeight:'900',
+    color:'#032B34'}}>Enter Credentials:</Text>
+        <TextInput
+          style={styles.input2}
+          value={credentials}
+          onChangeText={(text) => setCredentials(text)}
+          placeholder={`Enter ${paymentMethod === 'card' ? 'card details' : 'credentials'}`}
+          secureTextEntry={paymentMethod !== 'card'} // Hide text for non-card methods
+        />
+
+        <TouchableOpacity style={styles.googleLoginButton} onPress={()=>handlePaymentMethodChange('mtn')}>
+           
+            <Text style={styles.googleLoginText}>Confirm</Text>
+          </TouchableOpacity>
           </View>
-        </View>
-      </Modal>
+      </Animated.View>
+    </View>
+
+    </Modal1>
     </>
   );
 };
@@ -261,6 +321,76 @@ const styles = StyleSheet.create({
     color: '#032B44',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  container2: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems:'center',
+    justifyContent:'flex-start'
+  },
+  label: {
+    fontSize: 23,
+    marginBottom: 25,
+    fontWeight:'900',
+    color:'#032B34'
+  },
+  picker: {
+    height: 40,
+    width:300,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#ccc',
+  },
+  input2: {
+    height: Dimensions.get('screen').height * 0.06,
+    width: Dimensions.get('screen').width * 0.6,
+    borderRadius: 10,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    backgroundColor:'white',
+    marginBottom:'5%'
+  },
+  googleLoginButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: Dimensions.get('screen').height * 0.06,
+    width: Dimensions.get('screen').width * 0.35,
+    backgroundColor: '#032B44',
+    borderRadius: 5,
+    justifyContent: 'center',
+    marginBottom: 20,
+    marginLeft:13,
+    marginRight:'3%'
+  },
+  googleIcon: {
+    width: 50,
+    height: 35,
+  },
+  googleLoginText: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight:'700'
+  },
+  googleLoginButton2: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: Dimensions.get('screen').height * 0.06,
+    width: Dimensions.get('screen').width * 0.74,
+    backgroundColor: '#032B44',
+    borderRadius: 5,
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  googleIcon2: {
+    width: 50,
+    height: 35,
+  },
+  googleLoginText2: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight:'700'
   },
 });
 

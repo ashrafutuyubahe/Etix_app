@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { SafeAreaView,View,Image , Animated,Text, TextInput, TouchableOpacity } from 'react-native';
+import { StyleSheet,SafeAreaView,View,Image , Animated,Text, TextInput, TouchableOpacity } from 'react-native';
 import { useDispatch } from 'react-redux';
+import { Dimensions } from 'react-native';
 import { setAgecnyLoginData } from '../appSlice/appSlices';
 import { Picker } from '@react-native-picker/picker';
 import { useNavigation } from '@react-navigation/native';
-
+import { ScrollView } from 'react-native';
 
 
 const AgencyLogin = () => {
-  const [email,setEmail] = useState('')
+  const [name,setName] = useState('')
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
   const [selectedAgency, setSelectedAgency] = useState('');
@@ -17,70 +18,166 @@ const AgencyLogin = () => {
   
   const HandleLogin =(e)=>{
     e.preventDefault();
-    dispatch(setAgecnyLoginData([selectedAgency , email , password]));
+    dispatch(setAgecnyLoginData([selectedAgency , name , password]));
     setPassword('');
-    setEmail('')
-    navigator.navigate('pages')
+    setName('')
+    navigator.navigate('Driver')
   }
 
 
 
 
   return (
-    <>
-    <View style={{width:'100%',backgroundColor:'#032B44',flex:1,justifyContent:'center',alignContent:'center'}}>
-    <Text className='mb-7' style={{fontSize:40,fontWeight:'900',color:'white',paddingLeft:175}}>
-    ETIX
-   </Text>
-    </View>
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center',position:'relative',top:'-15%',paddingLeft:4 }}>
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center',backgroundColor:'#E5EDF0',width:400,height:550,borderRadius:15,position:'relative'}}>
-      <View>
+    <ScrollView 
+    contentContainerStyle={{ height: Dimensions.get('window').height * 1.3 }}
+    style={{ flex: 1,width:'100%'}}
+    >
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#032B44',width:'100%' }}>
+    <View style={{ flex: 1, alignItems:'center',paddingTop:'12%'}}>
+        <Text style={styles.title}>ETIX</Text>
+      </View>
+    <View style={styles.loginContainer}>
+    <View style={styles.loginBox}>
+    
       <Picker
-        
-        style={{ height: 20, width:340,borderRadius:25, borderColor: 'gray', borderWidth: 1,paddingTop:95,backgroundColor:'white' }}
+        style={styles.input}
         selectedValue={selectedAgency}
         onValueChange={(itemValue) => setSelectedAgency(itemValue)}
       >
-        <Picker.Item label="Horizon" value="horizon" />
-        <Picker.Item label="Volcan Express" value="volcan-express" />
+        <Picker.Item label="Choose your Agency"  disabled={true} />
+        <Picker.Item label="Volcano" value="Volcano" />
+        <Picker.Item label="Horizon" value="Horizon" />
         <Picker.Item label="Litico" value="Litico" />
       </Picker>
-    </View>
-   
-     
+    
       <TextInput
-        placeholder="  Email"
+        placeholder="  Driver name"
         className='mt-7'
-        value={email}
-        onChangeText={(text) => setEmail(text)}
-        style={{ height: 55, width:350,borderRadius:10, borderColor: '#ccc', borderWidth: 1 ,backgroundColor:'white'}}
+        value={name}
+        onChangeText={(text) => setName(text)}
+        style={styles.input}
       />
       <TextInput
         className='mt-7'
         placeholder="  Password"
         value={password}
         onChangeText={(text) => setPassword(text)}
-        style={{ height: 55, width:350,borderRadius: 10  ,borderColor: '#ccc', borderWidth: 1 ,backgroundColor:'white'}}
+        style={styles.input}
         secureTextEntry={true}
       />
       <TouchableOpacity>
-        <Text className='text-blue-600 text-psemibold   mt-2  text-end' style={{fontSize:18,color:'#032B44',fontWeight:'600'}}>
+        <Text className='text-blue-600 text-psemibold   mt-2  text-end' style={styles.forgotPasswordText}>
         Forgot password
       </Text>
       </TouchableOpacity>
       
-      <TouchableOpacity onPress={HandleLogin}  style={{ marginTop: 20 }}>
-        <View style={{ backgroundColor:'#032B44', padding: 15, borderRadius: 15,width:200,alignContent:'center',justifyContent:'center' }}>
-          <Text style={{ color: '#fff',fontSize:16,fontWeight:'900',alignContent:'center',paddingLeft:70}} >Login</Text>
+      <TouchableOpacity onPress={HandleLogin}  style={styles.loginButtonContainer}>
+        <View style={styles.loginButton}>
+          <Text style={styles.loginButtonText} >Login</Text>
         </View>
       </TouchableOpacity>
       </View>
     </View>
-    </>
+    </SafeAreaView>
+    </ScrollView>
   );
 };
+const styles = StyleSheet.create({
+  title: {
+    fontSize: 40,
+    fontWeight: '900',
+    color: 'white',
+  
+  },
 
+  loginContainer: {
+    backgroundColor: 'white',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+  },
+
+ 
+  loginBox: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#E5EDF0',
+    width: Dimensions.get('screen').width * 0.90,
+    height: Dimensions.get('screen').height * 0.60,
+    borderRadius: 10,
+    position: 'relative',
+    top: '-50%',
+  },
+  googleLoginButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: Dimensions.get('screen').height * 0.05,
+    width: Dimensions.get('screen').width * 0.8,
+    backgroundColor: '#032B44',
+    borderRadius: 5,
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  googleIcon: {
+    width: 30,
+    height: 23,
+  },
+  googleLoginText: {
+    color: 'white',
+    fontSize: 15,
+  },
+  input: {
+    height: Dimensions.get('screen').height * 0.07,
+    width: Dimensions.get('screen').width * 0.8,
+    borderRadius: 10,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    backgroundColor:'white'
+    
+  },
+  forgotPasswordText: {
+    fontSize: 18,
+    color: '#032B44',
+    fontWeight: '600',
+    marginBottom: 10,
+  },
+  orText: {
+    fontSize: 20,
+  },
+  signupText: {
+    fontSize: 18,
+    color: '#032B44',
+    fontWeight: '600',
+   
+  },
+  signupLink: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#032B44',
+  },
+  loginButtonContainer: {
+    marginTop: 20,
+  },
+  loginButton: {
+    backgroundColor: '#032B44',
+    padding: 15,
+    borderRadius: 12,
+    width: Dimensions.get('screen').width * 0.5,
+    alignContent: 'center',
+    justifyContent: 'center',
+  },
+  loginButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '900',
+    textAlign: 'center',
+  },
+
+
+});
 export default AgencyLogin;
 
 

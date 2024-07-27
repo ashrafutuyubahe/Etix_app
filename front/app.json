@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "ETIX App",
-    "slug": "ETIX-test-mode",
+    "name": "DoneWithIt",
+    "slug": "DoneWithIt",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -12,34 +12,22 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true,
-      "runtimeVersion": {
-        "policy": "appVersion"
-      },
-      "infoPlist": {
-        "NSCameraUsageDescription": "This app uses the camera to scan QR codes."
-      }
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "ETIX.android",
-      "runtimeVersion": "1.0.0",
-      "permissions": ["CAMERA"]
+      "package": "ETIX.android"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "extra": {
       "eas": {
-        "projectId": "aa6c7b59-c5c1-44d4-9918-fa9e79f349b1"
+        "projectId": "a0107ab0-86d7-46d3-b4b2-3e18f29594c3"
       }
-    },
-    "updates": {
-      "url": "https://u.expo.dev/aa6c7b59-c5c1-44d4-9918-fa9e79f349b1",
-      "fallbackToCacheTimeout": 0
     }
   }
 }
