@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -9,35 +9,52 @@ import {
   Button,
   Alert
 } from 'react-native';
-import QRCodeScanner from 'react-native-qrcode-scanner';
-import { RNCamera } from 'react-native-camera';
+import * as BarCodeScanner from 'expo-barcode-scanner';
 import axios from 'axios';
 
 const DriverDashboard = ({ navigation }) => {
+  const [hasPermission, setHasPermission] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [scanned, setScanned] = useState(false);
 
-  const handleScan = async (e) => {
+  // Request camera permission on component mount
+  useEffect(() => {
+    (async () => {
+      const { status } = await BarCodeScanner.requestPermissionsAsync();
+      setHasPermission(status === 'granted');
+    })();
+  }, []);
+
+  // Handle QR code scan
+  const handleScan = async ({ type, data }) => {
+    setScanned(true);
     try {
       // Parse the QR code data
-      const qrData = JSON.parse(e.data);
+      const qrData = JSON.parse(data);
 
       // Make a POST request to the endpoint with the scanned data
       const response = await axios.post('http://192.168.43.76:2000/scanTicket', qrData);
 
+      // Handle the response from the server
       if (response.status === 200) {
-        // If the response is successful, show the success message
         Alert.alert('Success', response.data.message);
       } else {
-        // If the response indicates an error, show the error message
-        Alert.alert('Error', response.data.error);
+        Alert.alert('Error', response.data.error || 'Unknown error occurred');
       }
     } catch (error) {
-      // Handle any errors that occur during the request
       Alert.alert('Error', error.response?.data?.error || 'An error occurred');
     }
-    // Close the modal after processing
+    // Close the modal and reset scanned state
     setModalVisible(false);
+    setScanned(false);
   };
+
+  if (hasPermission === null) {
+    return <Text>Requesting for camera permission</Text>;
+  }
+  if (hasPermission === false) {
+    return <Text>No access to camera</Text>;
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -53,17 +70,21 @@ const DriverDashboard = ({ navigation }) => {
         animationType="slide"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+        onRequestClose={() => {
+          setModalVisible(false);
+          setScanned(false); // Reset scanned state when modal closes
+        }}
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalView}>
             <Text style={styles.modalText}>Please scan the ticket</Text>
-            <QRCodeScanner
-              onRead={handleScan}
-              flashMode={RNCamera.Constants.FlashMode.auto}
-              topContent={<Text style={styles.centerText}>Align the QR code inside the frame</Text>}
-              bottomContent={<Button title="Close" onPress={() => setModalVisible(false)} color="red" />}
+            <BarCodeScanner
+              onBarCodeScanned={scanned ? undefined : handleScan}
+              style={StyleSheet.absoluteFillObject}
             />
+            <View style={styles.bottomContainer}>
+              <Button title="Close" onPress={() => setModalVisible(false)} color="red" />
+            </View>
           </View>
         </View>
       </Modal>
@@ -113,11 +134,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginBottom: 15,
   },
-  centerText: {
-    flex: 1,
-    fontSize: 18,
-    padding: 32,
-    color: '#777',
+  bottomContainer: {
+    marginTop: 20,
   }
 });
 

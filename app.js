@@ -98,11 +98,11 @@ app.use(
   })
 );
 
-// Initialize Passport
+
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Google OAuth configuration
+
 passport.use(
   new GoogleStrategy(
     {
@@ -112,7 +112,7 @@ passport.use(
       scope: ["profile", "email"],
     },
     async (accessToken, refreshToken, profile, done) => {
-      // Find or create user in your database
+      
       const existingUser = await User.findOne({ googleId: profile.id });
       if (existingUser) {
         return done(null, existingUser);
@@ -137,7 +137,7 @@ passport.deserializeUser(async (id, done) => {
   done(null, user);
 });
 
-// Routes
+
 app.get("/", (req, res) => {
   res.render("landing");
 });
@@ -178,7 +178,7 @@ app.use("/driverAuth", driverLogin);
 
 app.use("/user/send-message/", sendSMS);
 
-//admin authenticaton
+//driver authenticaton
 
 const driverSchema = joi.object({
   driverName: joi.string().min(3).max(30).required(),
@@ -248,7 +248,7 @@ const getAccessToken = async () => {
   }
 };
 
-// Function to initiate payment
+
 const initiateAirtelMoneyPayment = async (
   phoneNumber,
   amount,

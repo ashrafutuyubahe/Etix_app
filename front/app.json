@@ -15,6 +15,9 @@
       "supportsTablet": true,
       "runtimeVersion": {
         "policy": "appVersion"
+      },
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses the camera to scan QR codes."
       }
     },
     "android": {
@@ -23,7 +26,8 @@
         "backgroundColor": "#ffffff"
       },
       "package": "ETIX.android",
-      "runtimeVersion": "1.0.0"
+      "runtimeVersion": "1.0.0",
+      "permissions": ["CAMERA"]
     },
     "web": {
       "favicon": "./assets/favicon.png"
