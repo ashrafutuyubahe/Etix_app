@@ -10,8 +10,7 @@ const DriverScreen = () => {
   const [hasPermission, setHasPermission] = useState(null);
   const [scanning, setScanning] = useState(false);
   const [scanData, setScanData] = useState(null);
-
-  const navigation = useNavigation();
+ const navigation = useNavigation();
 
   useEffect(() => {
     (async () => {
@@ -19,6 +18,7 @@ const DriverScreen = () => {
       setHasPermission(status === 'granted');
     })();
   }, []);
+
 
   const handleBarCodeScanned = async ({ type, data }) => {
     setScanning(false);

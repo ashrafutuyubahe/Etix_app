@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "DoneWithIt",
-    "slug": "DoneWithIt",
+    "name": "ETIX",
+    "slug": "ETIX",
     "version": "1.0.0",
     "entryPoint": "node_modules/expo/AppEntry.js",
     "orientation": "portrait",
