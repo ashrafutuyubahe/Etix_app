@@ -12,6 +12,8 @@ const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const userlogin = require("./routes/userlogin");
 const driverLogin = require("./routes/Driverauth");
+const TicketSchedule= require('./routes/ticketSchedule');
+const TicketScheduleModel= require('./models/scheduleModel')
 const Driver = require("./models/driverModel");
 const authenticateToken = require("./middlewares/userAuth");
 const wholeUserAuth = require("./routes/wholeuseAuth");
@@ -177,6 +179,9 @@ app.use("/userAuth", userlogin);
 app.use("/driverAuth", driverLogin);
 
 app.use("/user/send-message/", sendSMS);
+app.use('/admin',TicketSchedule);
+
+
 
 //driver authenticaton
 
@@ -184,8 +189,8 @@ const driverSchema = joi.object({
   driverName: joi.string().min(3).max(30).required(),
   driverPassword: joi.string().required(),
    driverCar: joi.string().required(),
+   driverAgency:joi.string().required()
 });
-
 app.post("/AddDrivers", async (req, res) => {
   const { error } = driverSchema.validate(req.body);
 
@@ -194,25 +199,31 @@ app.post("/AddDrivers", async (req, res) => {
   }
 
   try {
-    const { driverName, driverPassword,driverCar } = req.body;
+    const { driverName, driverPassword, driverCar, driverAgency } = req.body;
 
-    const existingDriver = await Driver.findOne({driverName});
+   
+    const existingDriver = await Driver.findOne({ driverName, driverCar });
     if (existingDriver) {
-      return res.status(400).json({ error: "Driver with that email already exists" });
+      return res.status(400).json({ error: "Driver with that name and car already exists" });
     }
 
+ 
     const hashedPassword = await bcrypt.hash(driverPassword, 10);
 
+    
     const newDriver = new Driver({
       driverName,
-      driverPassword:hashedPassword,
+      driverPassword: hashedPassword,
       driverCar,
+      driverAgency
     });
 
-    if (await newDriver.save())
-      return res.status(201).json({ message: "Driver has been added successfully" });
-    return res.status(404).json({ message: "failed to add new Driver" });
+    
+    await newDriver.save();
+
+    return res.status(201).json({ message: "Driver has been added successfully" });
   } catch (err) {
+    console.error(err); 
     res.status(500).json({ error: "Internal server error" });
   }
 });

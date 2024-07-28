@@ -9,13 +9,13 @@ const mongoose = require("mongoose");
 
 Router.post("/driverLogin", async (req, res) => {
   try {
-    const { driverName, driverPassword, driverCar } = req.body;
+    const { driverName, driverPassword, driverCar,driverAgency } = req.body;
 
-    if (!driverName || !driverPassword || !driverCar) {
+    if (!driverName || !driverPassword || !driverCar || !driverAgency) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    const driver = await Driver.findOne({ driverName, driverCar });
+    const driver = await Driver.findOne({ driverName, driverCar,driverAgency });
 
     if (!driver) {
       return res.status(400).json({ error: "Invalid Name, Car, or Password" });
