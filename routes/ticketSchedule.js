@@ -77,10 +77,11 @@ Router.get("/findschedule", async (req, res) => {
       destination,
       agency,
     });
-    if (!retrieveAllTicketSchedule) {
-      return res.status(404).send("schedule for specified route is not found");
+    if (retrieveAllTicketSchedule.length === 0) {
+      return res.status(404).json({
+        message: "No ticket schedule found for the specified route and agency",
+      });
     }
-
     return res.status(200).json({ retrieveAllTicketSchedule });
   } catch (error) {
     console.error(err);
