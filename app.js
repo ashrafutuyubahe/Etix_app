@@ -180,6 +180,8 @@ app.use("/driverAuth", driverLogin);
 
 app.use("/user/send-message/", sendSMS);
 app.use('/admin',TicketSchedule);
+app.use('/tickeschedule/find',TicketSchedule);
+
 
 
 
@@ -191,6 +193,7 @@ const driverSchema = joi.object({
    driverCar: joi.string().required(),
    driverAgency:joi.string().required()
 });
+
 app.post("/AddDrivers", async (req, res) => {
   const { error } = driverSchema.validate(req.body);
 

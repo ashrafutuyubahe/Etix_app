@@ -31,7 +31,8 @@ const ticketScheduleSchema = new mongoose.Schema({
   driverName: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
+agency:{type:String,required:true}
   }
 });
 
