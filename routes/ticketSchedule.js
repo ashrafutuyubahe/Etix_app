@@ -43,7 +43,7 @@ Router.post("/addSchedule", async (req, res) => {
 
     if (findScheduleExists) {
       return res
-        .status(409)
+        .status(401)
         .json({ error: "A similar schedule already exists"});
     }
 
@@ -57,18 +57,18 @@ Router.post("/addSchedule", async (req, res) => {
 
 
 
+
 Router.get("/findschedule", async (req, res) => {
   try {
-    const { origin, destination, agency } = req.body;
-    
+    const { origin, destination, agency } = req.query;
 
     if (!agency || !origin || !destination) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    const retrieveAllTicketSchedule = await TicketScheduleModel.find({origin,destination,agency});
+    const retrieveAllTicketSchedule = await TicketScheduleModel.find({ origin, destination, agency });
 
-    if (!retrieveAllTicketSchedule) {
+    if (retrieveAllTicketSchedule.length === 0) {
       return res.status(404).json({
         message: "No tickets schedule found for the specified route and agency",
       });
