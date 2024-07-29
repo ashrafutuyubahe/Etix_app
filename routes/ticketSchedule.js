@@ -1,6 +1,6 @@
 const express = require("express");
 const Router = express.Router();
-const TicketScheduleModel = require("../models/scheduleModel");
+const TicketScheduleModel = require('../models/scheduleModel')
 const dbconnection = require("../dbconnection");
 
 Router.post("/addSchedule", async (req, res) => {
@@ -16,16 +16,7 @@ Router.post("/addSchedule", async (req, res) => {
       agency,
     } = req.body;
 
-    if (
-      (!carPlate ||
-        !origin ||
-        !destination ||
-        !departureTime ||
-        !arrivalTime ||
-        !cost ||
-        !driverName,
-      !agency)
-    ) {
+    if(!carPlate ||!origin ||!destination || !departureTime ||!arrivalTime ||!cost ||!driverName,!agency) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
@@ -53,57 +44,43 @@ Router.post("/addSchedule", async (req, res) => {
     if (findScheduleExists) {
       return res
         .status(409)
-        .json({ error: "A similar schedule already exists" });
+        .json({ error: "A similar schedule already exists"});
     }
 
-    await newSchedule.save();
-    res.status(201).json({ message: "Schedule added successfully" });
+     if(await newSchedule.save()) return  res.status(201).json({ message: "Schedule added successfully" });
+     return res.status(400).send('failed to add ticket schedule');
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
+
+
 Router.get("/findschedule", async (req, res) => {
   try {
     const { origin, destination, agency } = req.body;
+    
 
     if (!agency || !origin || !destination) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    const retrieveAllTicketSchedule = await TicketScheduleModel.findOne({
-      origin,
-      destination,
-      agency,
-    });
-    if (retrieveAllTicketSchedule.length === 0) {
+    const retrieveAllTicketSchedule = await TicketScheduleModel.find({origin,destination,agency});
+
+    if (!retrieveAllTicketSchedule) {
       return res.status(404).json({
-        message: "No ticket schedule found for the specified route and agency",
+        message: "No tickets schedule found for the specified route and agency",
       });
     }
-    return res.status(200).json({ retrieveAllTicketSchedule });
+    
+    return res.status(200).json(retrieveAllTicketSchedule);
   } catch (error) {
-    console.error(err);
+    console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-Router.delete("/deleteSchedule/:id", async (req, res) => {
-  try {
-    const { id } = req.query;
-    const findschedulewithIdAndDelete =
-      await TicketScheduleModel.findByIdAndDelete({ id });
-    if (!findschedulewithIdAndDelete) {
-      return re.status(401).send("failed to delete the schedule");
-    }
-
-    return res.status(200).send("the schedule has been deleted successfully");
-  } catch (error) {
-    console.error(err);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
 
 Router.put("/updateSchedule/:id", async (req, res) => {
   const {id}= req.query

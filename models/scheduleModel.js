@@ -1,39 +1,44 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const ticketScheduleSchema = new mongoose.Schema({
   carPlate: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
   },
   origin: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
   },
   destination: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
   },
   departureTime: {
     type: Date,
-    required: true
+    required: true,
   },
   arrivalTime: {
     type: Date,
-    required: true
+    required: true,
   },
   cost: {
     type: Number,
-    required: true
+    required: true,
   },
   driverName: {
     type: String,
     required: true,
-    trim: true,
-agency:{type:String,required:true}
-  }
+    trim: true
+  },
+    agency: { type: String, required: true },
+  
 });
 
-module.exports = mongoose.model('TicketSchedule', ticketScheduleSchema);
+const TicketScheduleModel = mongoose.model(
+  "TicketScheduleModel",
+  ticketScheduleSchema
+);
+module.exports = TicketScheduleModel;
