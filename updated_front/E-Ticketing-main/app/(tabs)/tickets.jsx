@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Easing, StyleSheet, Text, View, ScrollView, SafeAreaView, ActivityIndicator, Alert, Modal, TouchableOpacity, TextInput, Dimensions, Image, Animated } from 'react-native';
-import { useRoute } from '@react-navigation/native';
+import { useRoute, useNavigation } from '@react-navigation/native';
 import Modal1 from '../components/Modal';
 
 const Tickets = () => {
@@ -16,7 +16,53 @@ const Tickets = () => {
   const slideAnim = useRef(new Animated.Value(100)).current;
 
   const route = useRoute();
+  const navigation = useNavigation();
   const { origin, destination, agency } = route.params;
+
+  useEffect(() => {
+    // Validation check
+    if (!origin || !destination || !agency) {
+      Alert.alert('Error', 'Please enter the required booking details.');
+      navigation.navigate('Booking');
+      return;
+    }
+
+    const API_URL = 'http://192.168.43.76:2000/findTickets';
+    const requestBody = {
+      origin,
+      destination,
+      agency,
+    };
+
+    fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.error) {
+        Alert.alert('Error', data.error);
+      } else if (data.message) {
+        Alert.alert('Info', data.message);
+      } else {
+        setTickets(data);
+      }
+      setLoading(false);
+    })
+    .catch(error => {
+      console.error('Error fetching tickets:', error);
+      Alert.alert('TICKET NOT FOUND!', 'No tickets found for the specified route and agency.');
+      setLoading(false);
+    });
+  }, [origin, destination, agency, navigation]);
 
   const closeModal = () => {
     setModalVisible(false);
@@ -60,50 +106,6 @@ const Tickets = () => {
     console.log('Payment Credentials:', paymentCredentials);
     setModalVisible(false);
   };
-
-  useEffect(() => {
-    if (!origin || !destination || !agency) {
-      Alert.alert('Error', 'Please enter the required booking details.');
-      navigation.navigate('Booking');
-      return;
-    }
-
-    const API_URL = 'http://192.168.43.76:2000/findTickets';
-    const requestBody = {
-      origin,
-      destination,
-      agency,
-    };
-
-    fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(requestBody)
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .then(data => {
-      if (data.error) {
-        Alert.alert('Error', data.error);
-      } else if (data.message) {
-        Alert.alert('Info', data.message);
-      } else {
-        setTickets(data);
-      }
-      setLoading(false);
-    })
-    .catch(error => {
-      console.error('Error fetching tickets:', error);
-      Alert.alert('TICKET NOT FOUND!', 'No tickets found for the specified route and agency.');
-      setLoading(false);
-    });
-  }, [origin, destination, agency]);
 
   const handleBuyTicket = () => {
     setModalVisible(true);
@@ -267,81 +269,75 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   buyButtonContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#035B94',
-    width: 90,
-    height: 40,
-    alignSelf: 'flex-end',
+    backgroundColor: '#00BFFF',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     borderRadius: 5,
+    marginTop: 10,
   },
   buyButton: {
     color: 'white',
-    fontSize: 18,
-    fontWeight: '700',
+    textAlign: 'center',
+    fontWeight: 'bold',
   },
   noTicketsText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#035B94',
+    fontSize: 18,
+    textAlign: 'center',
+    marginBottom: 20,
   },
   modalHeader: {
-    backgroundColor: '#035B94',
-    padding: 15,
     alignItems: 'center',
+    marginVertical: 10,
   },
   title: {
-    color: 'white',
     fontSize: 20,
     fontWeight: 'bold',
   },
   modalBody: {
     padding: 20,
+    alignItems: 'center',
   },
   paymentOptionsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
+    width: '100%',
     marginBottom: 20,
   },
   paymentOptionButton: {
-    flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 10,
   },
   paymentOptionImage: {
-    width: 100,
     height: 50,
+    width: 100,
+    marginBottom: 5,
   },
   paymentOptionImageSmall: {
-    width: 70,
     height: 50,
+    width: 50,
   },
   paymentOptionText: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 10,
+    marginTop: 5,
+    textAlign: 'center',
   },
   inputContainer: {
-    marginTop: 10,
+    width: '100%',
   },
   input: {
-    backgroundColor: '#FFFFFF',
-    padding: 10,
-    marginVertical: 5,
-    borderRadius: 5,
+    height: 40,
+    borderColor: '#ddd',
     borderWidth: 1,
-    borderColor: '#DDDDDD',
+    borderRadius: 5,
+    marginBottom: 15,
+    paddingHorizontal: 10,
   },
   confirmButton: {
-    backgroundColor: '#035B94',
-    padding: 15,
+    backgroundColor: '#00BFFF',
+    paddingVertical: 10,
     borderRadius: 5,
-    alignItems: 'center',
-    marginTop: 10,
   },
   confirmButtonText: {
-    color: '#FFFFFF',
-    fontSize: 18,
+    color: 'white',
+    textAlign: 'center',
     fontWeight: 'bold',
   },
   loading: {
