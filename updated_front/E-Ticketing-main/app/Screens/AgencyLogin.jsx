@@ -15,41 +15,43 @@ const AgencyLogin = () => {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (!name || !password || !selectedAgency || !vehiclePlate) {
-      Alert.alert('Error', 'All fields are required');
-      return;
-    }
+    // if (!name || !password || !selectedAgency || !vehiclePlate) {
+    //   Alert.alert('Error', 'All fields are required');
+    //   return;
+    // }
 
-    fetch('http://192.168.43.76:2000/driverAuth/driverLogin', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        driverName: name,
-        driverPassword: password,
-        driverCar: vehiclePlate,
-        driverAgency: selectedAgency,
-      }),
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.error) {
-        Alert.alert('Login Error', data.error);
-      } else if (data.message) {
-        Alert.alert('Success', data.message);
+    // fetch('http://192.168.43.76:2000/driverAuth/driverLogin', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify({
+    //     driverName: name,
+    //     driverPassword: password,
+    //     driverCar: vehiclePlate,
+    //     driverAgency: selectedAgency,
+    //   }),
+    // })
+    // .then(response => response.json())
+    // .then(data => {
+    //   if (data.error) {
+    //     Alert.alert('Login Error', data.error);
+    //   } else if (data.message) {
+    //     Alert.alert('Success', data.message);
        
-        setPassword('');
-        setName('');
-        setVehiclePlate('');
-        setSelectedAgency('');
-        navigator.navigate('Driver');
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      Alert.alert('Error', 'Something went wrong. Please try again.');
-    });
+    //     setPassword('');
+    //     setName('');
+    //     setVehiclePlate('');
+    //     setSelectedAgency('');
+    //     navigator.navigate('Driver');
+    //   }
+    // })
+    // .catch(error => {
+    //   console.error('Error:', error);
+    //   Alert.alert('Error', 'Something went wrong. Please try again.');
+    // });
+    navigator.navigate('Driver');
+
   };
 
   return (

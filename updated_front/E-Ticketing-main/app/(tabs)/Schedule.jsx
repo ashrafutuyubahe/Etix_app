@@ -312,7 +312,7 @@
     },
     googleLoginButton: {
       backgroundColor: "#035B94",
-      height:2,
+      height:20,
       width: "100%",
       borderRadius: 7,
       justifyContent: "center",

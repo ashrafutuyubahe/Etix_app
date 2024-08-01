@@ -10,7 +10,7 @@ const Tickets = () => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
   const [paymentCredentials, setPaymentCredentials] = useState('');
   const [name, setName] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('momo'); // Default to MoMo pay
+  const [paymentMethod, setPaymentMethod] = useState('momo'); 
   const [credentials, setCredentials] = useState('');
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(100)).current;
@@ -20,7 +20,7 @@ const Tickets = () => {
   const { origin, destination, agency } = route.params;
 
   useEffect(() => {
-    // Validation check
+
     if (!origin || !destination || !agency) {
       Alert.alert('Error', 'Please enter the required booking details.');
       navigation.navigate('Booking');
@@ -223,7 +223,7 @@ const Tickets = () => {
                 value={credentials}
                 onChangeText={(text) => setCredentials(text)}
                 placeholder={`Enter ${paymentMethod === 'card' ? 'card details' : 'credentials'}`}
-                secureTextEntry={paymentMethod !== 'card'} // Hide text for non-card methods
+                secureTextEntry={paymentMethod !== 'card'}
               />
               <TouchableOpacity style={styles.confirmButton} onPress={handleConfirmPayment}>
                 <Text style={styles.confirmButtonText}>Confirm</Text>

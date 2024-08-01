@@ -27,7 +27,26 @@ const Home = () => {
   const [translateX] = useState(new Animated.Value(-Dimensions.get('window').width));
   const navigator = useNavigation()
  
+  const handleLogout = async () => {
+    try {
+   
+    //   await fetch('http://your-api-url/logout', {
+    //     method: 'POST',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //      
+    //     },
+    //   });
   
+    //   
+    //   await AsyncStorage.removeItem('userToken');
+  
+      
+      navigation.navigate('LoginScreen'); 
+    } catch (error) {
+      console.error('Failed to log out:', error);
+    }
+  };
 
 
   const closeModal = () => {
@@ -40,7 +59,7 @@ const Home = () => {
     setIsOpen(!isOpen);
     Animated.spring(translateX, {
       toValue: isOpen ? -Dimensions.get('window').width : 0,
-      useNativeDriver: true, // Add this line for performance
+      useNativeDriver: true, 
     }).start();
   };
 
@@ -168,6 +187,7 @@ const Home = () => {
       </TouchableOpacity>
       <TouchableOpacity
             style={{
+              onPress: { handleLogout },
               height: '4%',
               width: '63%',
               alignSelf: 'center',
