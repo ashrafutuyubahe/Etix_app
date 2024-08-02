@@ -36,6 +36,10 @@ function Schedule() {
 
   const HandleContinue = async (e) => {
     e.preventDefault();
+    if (!Orgin || !destination || !agency) {
+      Alert.alert('Validation Error', 'Please select all fields Origin,Destination and Agency Before finding schedule.');
+      return;
+    }
     dispatch(setDestinationa(destination));
     dispatch(setOrgina(Orgin));
     dispatch(setAgency(agency));

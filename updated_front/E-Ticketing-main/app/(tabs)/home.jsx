@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, View,Animated } from 'react-native'
+import { StyleSheet,Alert,Text, TouchableOpacity, View,Animated } from 'react-native'
 import React from 'react'
 import { ScrollView } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -73,6 +73,10 @@ const Home = () => {
 
   const HandleContinue =(e)=>{
     e.preventDefault()
+    if (!Orgin || !destination) {
+      Alert.alert('Validation Error', 'Please select both origin and destination before continuing.');
+      return;
+    }
     dispatch(setDestinationa(destination))
     dispatch(setOrgina(Orgin))
     navigation.navigate('Booking')

@@ -11,16 +11,15 @@ const Tickets = () => {
   const [ticketFromData, setTicketFromData] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState(null); // New state for payment method
+  const [paymentMethod, setPaymentMethod] = useState(null); // State for payment method
+  const [validationMessage, setValidationMessage] = useState(''); // State for validation message
 
   useEffect(() => {
     const { ticket, origin, destination, agency } = route.params || {};
 
     if (ticket) {
-      // Directly provided ticket data
       setTicketFromData(ticket);
     } else if (origin && destination && agency) {
-      // Fetch ticket data based on booking details
       const fetchTickets = async () => {
         try {
           const response = await fetch('http://192.168.43.76:2000/findTickets', {
@@ -42,9 +41,10 @@ const Tickets = () => {
           const result = await response.json();
 
           if (Array.isArray(result) && result.length === 0) {
-            Alert.alert('No Results', 'No tickets found for the specified details');
+            Alert.alert('No Tickets Found', 'No tickets found for the specified details');
           } else {
             setTickets(result);
+            setValidationMessage(''); // Clear validation message when tickets are found
           }
         } catch (error) {
           console.error('Fetch error:', error);
@@ -55,12 +55,8 @@ const Tickets = () => {
       fetchTickets();
     } else {
       Alert.alert(
-        'Missing Information',
-        'Please go to the Booking screen to fill in the required fields or provide ticket data.',
-        [
-          { text: 'Go to Booking', onPress: () => navigation.navigate('Booking') },
-          { text: 'Find schedules in Home  ', onPress: () => navigation.navigate('Home') },
-        ]
+        'Incomplete Information',
+        'Please go to the Booking screen to fill in the required fields or go to Home to book tickets in the schedule.'
       );
     }
   }, [route.params]);
@@ -71,8 +67,12 @@ const Tickets = () => {
   };
 
   const handlePayment = async () => {
-    if (!selectedTicket || !paymentMethod) {
-      Alert.alert('Error', 'Please select a ticket and payment method.');
+    if (!selectedTicket) {
+      Alert.alert('Error', 'Please select a ticket.');
+      return;
+    }
+    if (!paymentMethod) {
+      Alert.alert('Error', 'Please select a payment method.');
       return;
     }
 
@@ -96,7 +96,6 @@ const Tickets = () => {
 
       if (result.success) {
         Alert.alert('Success', 'Payment successful!');
-        // Optionally, navigate or update state
         navigation.goBack(); // Navigate back or to another screen
       } else {
         Alert.alert('Failure', 'Payment failed. Please try again.');
@@ -117,7 +116,9 @@ const Tickets = () => {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollView}>
-        {ticketFromData ? (
+        {validationMessage ? (
+          <Text style={styles.validationMessage}>{validationMessage}</Text>
+        ) : ticketFromData ? (
           <View style={styles.card}>
             <Text style={styles.cardText}>Origin: {ticketFromData.origin}</Text>
             <Text style={styles.cardText}>Destination: {ticketFromData.destination}</Text>
@@ -141,9 +142,9 @@ const Tickets = () => {
               <Text style={styles.cardText}>Destination: {ticket.destination}</Text>
               <Text style={styles.cardText}>Agency: {ticket.agency}</Text>
               <Text style={styles.cardText}>Departure Time: {new Date(ticket.departureTime).toString()}</Text>
-              <Text style={styles.cardText}>Arrival Time: {new Date(ticket.arrivalTime).toString()}</Text>
+              <Text style={styles.cardText}>Arrival Time:  {new Date(selected.arrivalTime).toString()}</Text>
               <Text style={styles.cardText}>Price: {ticket.price}</Text>
-              <Text style={styles.cardText}>Ticket ID: {ticket.ticketId}</Text>
+      
 
               <TouchableOpacity
                 onPress={() => handleTicketSelect(ticket)}
@@ -165,14 +166,14 @@ const Tickets = () => {
         <View style={styles.modalBody}>
           <View style={styles.paymentOptionsContainer}>
             <TouchableOpacity
-              onPress={() => setPaymentMethod('MTN')} // Set payment method
+              onPress={() => setPaymentMethod('MTN')}
               style={styles.paymentOptionButton}
             >
               <Image style={styles.paymentOptionImage} source={require('../assets/MTN.png')} />
               <Text style={styles.paymentOptionText}>MTN</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => setPaymentMethod('airtel')} // Set payment method
+              onPress={() => setPaymentMethod('airtel')}
               style={styles.paymentOptionButton}
             >
               <Image style={styles.paymentOptionImage} source={require('../assets/airtel.png')} />
@@ -230,6 +231,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginVertical: 20,
   },
+  validationMessage: {
+    fontSize: 18,
+    color: '#d9534f',
+    textAlign: 'center',
+    marginVertical: 20,
+  },
   buyButtonContainer: {
     marginTop: 10,
     backgroundColor: '#0D6EFD',
@@ -257,27 +264,25 @@ const styles = StyleSheet.create({
   paymentOptionsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    width: '100%',
+    marginBottom: 20,
   },
   paymentOptionButton: {
     alignItems: 'center',
   },
   paymentOptionImage: {
-    width: 80,
-    height: 80,
+    width: 100,
+    height: 50,
     marginBottom: 10,
   },
   paymentOptionText: {
     fontSize: 16,
-    color: '#032B44',
+    color: '#333',
   },
   confirmButton: {
-    marginTop: 20,
     backgroundColor: '#0D6EFD',
-    paddingVertical: 10,
+    paddingVertical: 15,
+    paddingHorizontal: 30,
     borderRadius: 5,
-    width: '100%',
-    alignItems: 'center',
   },
   confirmButtonText: {
     color: '#fff',
