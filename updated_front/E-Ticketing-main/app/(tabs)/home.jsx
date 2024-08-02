@@ -29,19 +29,7 @@ const Home = () => {
  
   const handleLogout = async () => {
     try {
-   
-    //   await fetch('http://your-api-url/logout', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //      
-    //     },
-    //   });
   
-    //   
-    //   await AsyncStorage.removeItem('userToken');
-  
-      
       navigation.navigate('LoginScreen'); 
     } catch (error) {
       console.error('Failed to log out:', error);
@@ -449,7 +437,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top:'0%',
     bottom:'0%',
-    width: Dimensions.get('window').width * 0.8, // Adjust width as needed
+    width: Dimensions.get('window').width * 0.8, 
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     borderLeftWidth: 1,
     borderLeftColor: '#ccc',
