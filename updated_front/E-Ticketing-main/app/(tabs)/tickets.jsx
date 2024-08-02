@@ -51,8 +51,8 @@ const Tickets = () => {
             setValidationMessage(''); 
           }
         } catch (error) {
-          console.error('Fetch error:', error);
-          Alert.alert('Error', 'Failed to fetch tickets');
+          // console.error('Fetch error:', error);
+          Alert.alert('Error', 'No Tickets for specified Route and Agency');
         }
       };
 

@@ -83,8 +83,8 @@ function Schedule() {
         setModalVisible(false);
       }
     } catch (error) {
-      console.error("Fetch error:", error);
-      Alert.alert("Error", "Failed to fetch ticket schedules");
+      // console.error("Fetch error:", error);
+      Alert.alert("Error", " No Ticket schedules for specified Route and Agency , Please choose another Route");
     }
   };
 
