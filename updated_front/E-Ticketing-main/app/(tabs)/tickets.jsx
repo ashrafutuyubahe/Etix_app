@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, Image, TextInput } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import BackdropModal from '../components/backDropModal';
 import Modal1 from '../components/Modal';
 
 const Tickets = () => {
@@ -11,8 +10,13 @@ const Tickets = () => {
   const [ticketFromData, setTicketFromData] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState(null); // State for payment method
-  const [validationMessage, setValidationMessage] = useState(''); // State for validation message
+  const [paymentMethod, setPaymentMethod] = useState(null); 
+  const [clientName, setClientName] = useState(''); 
+  const [phoneNumber, setPhoneNumber] = useState(''); 
+  const [debitCardNumber, setDebitCardNumber] = useState(''); 
+  const [debitCardExpiry, setDebitCardExpiry] = useState(''); 
+  const [debitCardCVC, setDebitCardCVC] = useState('');
+  const [validationMessage, setValidationMessage] = useState(''); 
 
   useEffect(() => {
     const { ticket, origin, destination, agency } = route.params || {};
@@ -44,7 +48,7 @@ const Tickets = () => {
             Alert.alert('No Tickets Found', 'No tickets found for the specified details');
           } else {
             setTickets(result);
-            setValidationMessage(''); // Clear validation message when tickets are found
+            setValidationMessage(''); 
           }
         } catch (error) {
           console.error('Fetch error:', error);
@@ -71,36 +75,57 @@ const Tickets = () => {
       Alert.alert('Error', 'Please select a ticket.');
       return;
     }
+  
     if (!paymentMethod) {
       Alert.alert('Error', 'Please select a payment method.');
       return;
     }
-
+  
+    let paymentDetails = {
+      ticketId: selectedTicket.ticketId,
+      paymentMethod,
+      clientName,
+    };
+  
+    
+    if (paymentMethod === 'airtel' || paymentMethod === 'MTN') {
+      if (!phoneNumber || !clientName) {
+        Alert.alert('Error', 'Please fill in all required fields.');
+        return;
+      }
+      paymentDetails.phoneNumber = phoneNumber;
+    } else if (paymentMethod === 'debit') {
+      if (!clientName || !debitCardNumber || !debitCardExpiry || !debitCardCVC) {
+        Alert.alert('Error', 'Please fill in all required fields.');
+        return;
+      }
+      paymentDetails.debitCardNumber = debitCardNumber;
+      paymentDetails.debitCardExpiry = debitCardExpiry;
+      paymentDetails.debitCardCVC = debitCardCVC;
+    }
+  
     try {
       const response = await fetch('http://192.168.43.76:2000/validatePayment', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ticketId: selectedTicket.ticketId,
-          paymentMethod,
-        }),
+        body: JSON.stringify(paymentDetails),
       });
-
+  
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
+  
       const result = await response.json();
-
+  
       if (result.success) {
         Alert.alert('Success', 'Payment successful!');
-        navigation.goBack(); // Navigate back or to another screen
+        navigation.goBack();
       } else {
         Alert.alert('Failure', 'Payment failed. Please try again.');
       }
-
+  
       setModalVisible(false);
     } catch (error) {
       console.error('Payment error:', error);
@@ -108,6 +133,7 @@ const Tickets = () => {
       setModalVisible(false);
     }
   };
+  
 
   return (
     <View style={styles.container}>
@@ -142,9 +168,8 @@ const Tickets = () => {
               <Text style={styles.cardText}>Destination: {ticket.destination}</Text>
               <Text style={styles.cardText}>Agency: {ticket.agency}</Text>
               <Text style={styles.cardText}>Departure Time: {new Date(ticket.departureTime).toString()}</Text>
-              <Text style={styles.cardText}>Arrival Time:  {new Date(selected.arrivalTime).toString()}</Text>
+              <Text style={styles.cardText}>Arrival Time: {new Date(ticket.arrivalTime).toString()}</Text>
               <Text style={styles.cardText}>Price: {ticket.price}</Text>
-      
 
               <TouchableOpacity
                 onPress={() => handleTicketSelect(ticket)}
@@ -179,11 +204,71 @@ const Tickets = () => {
               <Image style={styles.paymentOptionImage} source={require('../assets/airtel.png')} />
               <Text style={styles.paymentOptionText}>Airtel</Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setPaymentMethod('debit')}
+              style={styles.paymentOptionButton}
+            >
+              <Text style={styles.paymentOptionText}>Debit Card</Text>
+            </TouchableOpacity>
           </View>
 
-          <TouchableOpacity onPress={handlePayment} style={styles.confirmButton}>
-            <Text style={styles.confirmButtonText}>Confirm Payment</Text>
-          </TouchableOpacity>
+          {paymentMethod && (
+            <View style={styles.paymentForm}>
+              {paymentMethod === 'airtel' || paymentMethod === 'MTN' ? (
+                <>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Client Name"
+                    value={clientName}
+                    onChangeText={setClientName}
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Phone Number"
+                    keyboardType="phone-pad"
+                    value={phoneNumber}
+                    onChangeText={setPhoneNumber}
+                  />
+                </>
+              ) : paymentMethod === 'debit' ? (
+                <>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Client Name"
+                    value={clientName}
+                    onChangeText={setClientName}
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Card Number"
+                    keyboardType="numeric"
+                    value={debitCardNumber}
+                    onChangeText={setDebitCardNumber}
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Expiry Date (MM/YY)"
+                    value={debitCardExpiry}
+                    onChangeText={setDebitCardExpiry}
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="CVC"
+                    secureTextEntry
+                    keyboardType="numeric"
+                    value={debitCardCVC}
+                    onChangeText={setDebitCardCVC}
+                  />
+                </>
+              ) : null}
+              <TouchableOpacity
+                onPress={handlePayment}
+                style={styles.submitButton}
+              >
+                <Text style={styles.submitButtonText}>Submit Payment</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </Modal1>
     </View>
@@ -193,73 +278,72 @@ const Tickets = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    backgroundColor: '#f8f8f8',
   },
   header: {
-    backgroundColor: '#032B44',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    padding: 20,
+    backgroundColor: 'blue',
+    alignItems: 'center',
   },
   headerText: {
+    fontSize: 24,
     color: '#fff',
-    fontSize: 20,
     fontWeight: 'bold',
   },
   scrollView: {
-    paddingBottom: 20,
+    padding: 10,
   },
   card: {
-    backgroundColor: '#fff',
     padding: 15,
-    marginBottom: 10,
-    borderRadius: 10,
+    marginVertical: 10,
+    marginHorizontal: 5,
+    backgroundColor: '#fff',
+    borderRadius: 8,
     shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
-    elevation: 3,
+    elevation: 2,
   },
   cardText: {
     fontSize: 16,
-    color: '#333',
-  },
-  noTicketsText: {
-    fontSize: 18,
-    color: '#333',
-    textAlign: 'center',
-    marginVertical: 20,
-  },
-  validationMessage: {
-    fontSize: 18,
-    color: '#d9534f',
-    textAlign: 'center',
-    marginVertical: 20,
+    marginBottom: 5,
   },
   buyButtonContainer: {
     marginTop: 10,
-    backgroundColor: '#0D6EFD',
-    paddingVertical: 10,
-    borderRadius: 5,
     alignItems: 'center',
   },
   buyButton: {
+    backgroundColor: 'blue',
     color: '#fff',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  noTicketsText: {
+    textAlign: 'center',
     fontSize: 18,
+    color: '#666',
+    marginTop: 20,
   },
   modalHeader: {
-    alignItems: 'center',
-    paddingBottom: 20,
+    padding: 20,
+    backgroundColor: 'blue',
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
   },
   title: {
-    fontSize: 30,
+    fontSize: 18,
+    color: '#fff',
     fontWeight: 'bold',
-    color: '#032B44',
   },
   modalBody: {
-    alignItems: 'center',
-    paddingHorizontal: 20,
+    padding: 20,
+    backgroundColor: '#fff',
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
   },
   paymentOptionsContainer: {
     flexDirection: 'row',
@@ -272,21 +356,36 @@ const styles = StyleSheet.create({
   paymentOptionImage: {
     width: 100,
     height: 50,
-    marginBottom: 10,
   },
   paymentOptionText: {
     fontSize: 16,
-    color: '#333',
+    marginTop: 5,
   },
-  confirmButton: {
-    backgroundColor: '#0D6EFD',
-    paddingVertical: 15,
-    paddingHorizontal: 30,
+  paymentForm: {
+    marginTop: 10,
+  },
+  input: {
+    height: 40,
+    borderColor: '#ddd',
+    borderWidth: 1,
     borderRadius: 5,
+    marginBottom: 10,
+    paddingHorizontal: 10,
   },
-  confirmButtonText: {
+  submitButton: {
+    backgroundColor: '#ff6600',
+    paddingVertical: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  submitButtonText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 16,
+  },
+  validationMessage: {
+    color: 'red',
+    textAlign: 'center',
+    marginBottom: 20,
   },
 });
 
