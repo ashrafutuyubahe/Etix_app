@@ -1,41 +1,36 @@
-require("dotenv").config();
-const express = require("express");
-const joi = require("joi");
-const connection = require("./dbconnection");
-const path = require("path");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const User = require("./models/users");
-const mongoose = require("mongoose");
-const session = require("express-session");
-const passport = require("passport");
-const GoogleStrategy = require("passport-google-oauth20").Strategy;
+//file imports
 const userlogin = require("./routes/userlogin");
 const driverLogin = require("./routes/Driverauth");
+const ticketScheduleUpload = require('./routes/ticketscheduleUpload');
 const TicketSchedule= require('./routes/ticketSchedule');
 const TicketScheduleModel= require('./models/scheduleModel')
 const Driver = require("./models/driverModel");
 const authenticateToken = require("./middlewares/userAuth");
-const wholeUserAuth = require("./routes/wholeuseAuth");
-const cors = require("cors");
-const app = express();
-const PORT = process.env.PORT || 3000;
-const SECRET_KEY = process.env.SECRET_KEY || "your_secret_key";
-const sendSMS = require("./msgconfig");
-app.use(cors());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
-app.use(express.static(path.join(__dirname, "public")));
-const nodemailer = require("nodemailer");
-const CLIENT_SECRET_ID = "804330";
-const CLIENT_ID = "78dfb2e0-ddf3-4366-b7b5-cafff4739f56";
-const axios = require("axios");
 const Ticket = require("./models/ticketsModel");
 const BoughtTicket = require("./models/boughtTicketModel");
-const { v4: uuidv4 } = require("uuid");
+const wholeUserAuth = require("./routes/wholeuseAuth");
+const User = require("./models/users");
+const connection = require("./dbconnection");
+const sendSMS = require("./msgconfig");
+const SECRET_KEY = process.env.SECRET_KEY || "your_secret_key";
 
+//dependency imports
+const joi = require("joi");
+const path = require("path");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const mongoose = require("mongoose");
+const session = require("express-session");
+const passport = require("passport");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const axios = require("axios");
+const { v4: uuidv4 } = require("uuid");
+const nodemailer = require("nodemailer");
+const cors = require("cors");
+
+//origin config
+const express = require("express");
+const app = express();
 const allowedOrigins = [
   "http://localhost:19006",
   "exp://192.168.43.76:8081",
@@ -53,126 +48,20 @@ const corsOptions = {
     return callback(null, true);
   },
 };
-
 app.use(cors(corsOptions));
 
-//email sending logic
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: "ashraftuyubahe001@gmail.com",
-    pass: "mbpy qfhl vsmj twf",
-  },
-});
-
-const sendEmail = async (to, subject, text) => {
-  const mailOptions = {
-    from: "ashraftuyubahe001@gmail.com",
-    to: to,
-    subject: subject,
-    text: text,
-  };
-
-  try {
-    const info = await transporter.sendMail(mailOptions);
-    return { success: true, message: "Email sent: " + info.response };
-  } catch (error) {
-    return { success: false, error: "Error sending email: " + error };
-  }
-};
-
-app.post("/send-email", async (req, res) => {
-  const { to, subject, text } = req.body;
-
-  const result = await sendEmail(to, subject, text);
-  if (result.success) {
-    res.status(200).json({ message: result.message });
-  } else {
-    res.status(500).json({ error: result.error });
-  }
-});
-
-app.use(
-  session({
-    resave: false,
-    saveUninitialized: true,
-    secret: "SECRET",
-  })
-);
+//other config
+require("dotenv").config();
+const PORT = process.env.PORT || 3000;
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 
 
-app.use(passport.initialize());
-app.use(passport.session());
 
-
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: process.env.CLIENT_ID,
-      clientSecret: process.env.CLIENT_SECRET,
-      callbackURL: "http://localhost:2000/dash",
-      scope: ["profile", "email"],
-    },
-    async (accessToken, refreshToken, profile, done) => {
-      
-      const existingUser = await User.findOne({ googleId: profile.id });
-      if (existingUser) {
-        return done(null, existingUser);
-      }
-      const newUser = new User({
-        googleId: profile.id,
-        userName: profile.displayName,
-        userEmail: profile.emails[0].value,
-      });
-      await newUser.save();
-      done(null, newUser);
-    }
-  )
-);
-
-passport.serializeUser((user, done) => {
-  done(null, user.id);
-});
-
-passport.deserializeUser(async (id, done) => {
-  const user = await User.findById(id);
-  done(null, user);
-});
-
-
-app.get("/", (req, res) => {
-  res.render("landing");
-});
-
-app.get("/login", (req, res) => {
-  res.render("login");
-});
-
-app.get("/dash", (req, res) => {
-  res.render("dashboard");
-});
-
-app.get(
-  "/auth/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
-);
-
-app.get(
-  "/auth/google/callback",
-  passport.authenticate("google", { failureRedirect: "/login" }),
-  (req, res) => {
-    res.redirect("/login");
-  }
-);
-
-app.get("/logout", (req, res) => {
-  req.logout((err) => {
-    if (err) {
-      return next(err);
-    }
-    res.redirect("/");
-  });
-});
+//Middlewares
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/user", wholeUserAuth);
 app.use("/userAuth", userlogin);
@@ -181,12 +70,96 @@ app.use("/driverAuth", driverLogin);
 app.use("/user/send-message/", sendSMS);
 app.use('/admin',TicketSchedule);
 app.use('/tickeschedule/find',TicketSchedule);
+app.use("/uploadTicketScheduleFile",ticketScheduleUpload);
+
+
+
+
+//Social Login Logic(Google login)
+app.use(
+  session({
+    resave: false,
+    saveUninitialized: true,
+    secret: "SECRET",
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.CLIENT_ID,
+      clientSecret: process.env.CLIENT_SECRET,
+      callbackURL: "http://localhost:2000/dash",
+      scope: ["profile", "email"],
+    },  
+    async (accessToken, refreshToken, profile, done) => {
+      
+      const existingUser = await User.findOne({ googleId: profile.id });
+      if (existingUser) {
+        return done(null, existingUser);
+      }  
+      const newUser = new User({
+        googleId: profile.id,
+        userName: profile.displayName,
+        userEmail: profile.emails[0].value,
+      });  
+      await newUser.save();
+      done(null, newUser);
+    }  
+  )  
+);  
+
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});  
+
+passport.deserializeUser(async (id, done) => {
+  const user = await User.findById(id);
+  done(null, user);
+});  
+
+//google login endpoints
+app.get("/", (req, res) => {
+  res.render("landing");
+});  
+
+app.get("/login", (req, res) => {
+  res.render("login");
+});  
+
+app.get("/dash", (req, res) => {
+  res.render("dashboard");
+});  
+
+app.get(
+  "/auth/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);  
+
+app.get(
+  "/auth/google/callback",
+  passport.authenticate("google", { failureRedirect: "/login" }),
+  (req, res) => {
+    res.redirect("/login");
+  }  
+);  
+
+app.get("/logout", (req, res) => {
+  req.logout((err) => {
+    if (err) {
+      return next(err);
+    }  
+    res.redirect("/");
+  });  
+});  
 
 
 
 
 //driver authenticaton
-
 const driverSchema = joi.object({
   driverName: joi.string().min(3).max(30).required(),
   driverPassword: joi.string().required(),
@@ -209,10 +182,8 @@ app.post("/AddDrivers", async (req, res) => {
     if (existingDriver) {
       return res.status(400).json({ error: "Driver with that name and car already exists" });
     }
-
  
     const hashedPassword = await bcrypt.hash(driverPassword, 10);
-
     
     const newDriver = new Driver({
       driverName,
@@ -226,7 +197,7 @@ app.post("/AddDrivers", async (req, res) => {
 
     return res.status(201).json({ message: "Driver has been added successfully" });
   } catch (err) {
-    console.error(err); 
+    console.error(err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -237,6 +208,9 @@ app.get("/userDashboard", authenticateToken, (req, res) => {
     .json({ message: "This is a protected route", user: req.user });
 });
 
+
+
+//payment implementation logic
 const getAccessToken = async () => {
   try {
     const response = await axios.post(
@@ -326,6 +300,9 @@ app.post("/airtel-money-webhook", (req, res) => {
   res.sendStatus(200);
 });
 
+
+
+//Ticket endpoints
 app.post("/addTickets", async (req, res) => {
   const { origin, destination, departureTime, agency, price } = req.body;
 
@@ -352,13 +329,13 @@ app.post("/addTickets", async (req, res) => {
 
 app.post("/findTickets", async (req, res) => {
   const { origin, destination, agency } = req.body;
-
+  
   if (!origin || !destination || !agency) {
     return res
       .status(400)
       .json({ error: "Origin, destination, and agency are required" });
   }
-
+  
   try {
     const tickets = await Ticket.find({ origin, destination, agency });
     if (tickets.length === 0) {
@@ -369,20 +346,6 @@ app.post("/findTickets", async (req, res) => {
     res.json(tickets);
   } catch (error) {
     res.status(500).json({ error: "Server error" });
-  }
-});
-
-const QRCode = require("qrcode");
-app.get("/getQRcode", async (req, res) => {
-  try {
-    const dataObject = req.body;
-
-    const dataString = JSON.stringify(dataObject);
-    const qrCodeUrl = await QRCode.toDataURL(dataString);
-
-    res.send(`<img src="${qrCodeUrl}" alt="QR Code">`);
-  } catch (err) {
-    res.status(500).send("Error generating QR code");
   }
 });
 
@@ -398,7 +361,7 @@ app.post("/getYourBoughtTicket", async (req, res) => {
     paymentStatus,
     agency,
   } = req.body;
-
+  
   if (
     !userName ||
     !origin ||
@@ -411,9 +374,9 @@ app.post("/getYourBoughtTicket", async (req, res) => {
   ) {
     return res.status(400).json({ error: "All fields are required" });
   }
-
+  
   const ticketId = uuidv4();
-
+  
   const newTicket = new BoughtTicket({
     ticketId,
     userName,
@@ -426,34 +389,96 @@ app.post("/getYourBoughtTicket", async (req, res) => {
     agency,
     paymentStatus,
   });
-
+  
   const qrData = {
     ticketId: newTicket.ticketId,
     userName: newTicket.userName,
     paymentStatus: newTicket.paymentStatus,
   };
-
+  
   const qrString = JSON.stringify(qrData);
-
+  
   try {
     newTicket.qrCode = await QRCode.toDataURL(qrString);
-
+    
     const savedTicket = await newTicket.save();
-
+    
     if (!savedTicket) {
       return res
-        .status(500)
-        .json({ error: "Failed to save your bought ticket" });
+      .status(500)
+      .json({ error: "Failed to save your bought ticket" });
     }
-
+    
     res.status(201).json(newTicket);
   } catch (err) {
     console.error("Error generating QR code or saving ticket:", err);
     res.status(500).json({ error: "Failed to generate ticket" });
   }
+  app.post('/addBoughtTickets', async (req, res) => {
+    try {
+      const {
+        ticketId,
+        userName,
+        origin,
+        destination,
+        price,
+        departureTime,
+        arrivalTime,
+        paymentStatus,
+        qrCode,
+        vehicleNumber,
+        agency
+      } = req.body;
+      
+      
+      if (!ticketId || !userName || !origin || !destination || !price || !departureTime || !arrivalTime) {
+        return res.status(400).json({ error: 'All required fields must be provided' });
+      }
+  
+      
+      const newTicket = new BoughtTicket({
+        ticketId,
+        userName,
+        origin,
+        destination,
+        price,
+        departureTime,
+        arrivalTime,
+        paymentStatus: paymentStatus || 'pending', 
+        qrCode,
+        vehicleNumber,
+        agency
+      });
+      
+      
+      await newTicket.save();
+      
+      
+      res.status(201).json({ message: 'Ticket added successfully', ticket: newTicket });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
 });
 
 
+
+
+//scanning endpoints
+const QRCode = require("qrcode");
+app.get("/getQRcode", async (req, res) => {
+  try {
+    const dataObject = req.body;
+    
+    const dataString = JSON.stringify(dataObject);
+    const qrCodeUrl = await QRCode.toDataURL(dataString);
+    
+    res.send(`<img src="${qrCodeUrl}" alt="QR Code">`);
+  } catch (err) {
+    res.status(500).send("Error generating QR code");
+  }
+});
 app.post('/scanTicket', async (req, res) => {
   try {
     const { ticketId, userName, paymentStatus} = req.body;
@@ -484,55 +509,6 @@ app.post('/scanTicket', async (req, res) => {
   }
 });
 
-
-
-
-app.post('/addBoughtTickets', async (req, res) => {
-  try {
-    const {
-      ticketId,
-      userName,
-      origin,
-      destination,
-      price,
-      departureTime,
-      arrivalTime,
-      paymentStatus,
-      qrCode,
-      vehicleNumber,
-      agency
-    } = req.body;
-
-   
-    if (!ticketId || !userName || !origin || !destination || !price || !departureTime || !arrivalTime) {
-      return res.status(400).json({ error: 'All required fields must be provided' });
-    }
-
-    
-    const newTicket = new BoughtTicket({
-      ticketId,
-      userName,
-      origin,
-      destination,
-      price,
-      departureTime,
-      arrivalTime,
-      paymentStatus: paymentStatus || 'pending', 
-      qrCode,
-      vehicleNumber,
-      agency
-    });
-
-    
-    await newTicket.save();
-
-    
-    res.status(201).json({ message: 'Ticket added successfully', ticket: newTicket });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
 
 
 app.listen(PORT, () => {
