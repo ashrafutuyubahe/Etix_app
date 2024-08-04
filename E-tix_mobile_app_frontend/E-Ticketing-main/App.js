@@ -24,7 +24,7 @@ export default function App() {
    <Provider store={store}>
      <NavigationContainer style={styles.container}>
       <SafeAreaProvider >
-      <Stack.Navigator>
+     <Stack.Navigator>
         <Stack.Screen name="Landing" options={{headerShown:false}} component={Landing} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name='Signup' component={SignupScreen} />

@@ -152,7 +152,7 @@ const Tickets = () => {
             <Text style={styles.cardText}>Departure Time: {new Date(ticketFromData.departureTime).toString()}</Text>
             <Text style={styles.cardText}>Arrival Time: {new Date(ticketFromData.arrivalTime).toString()}</Text>
             <Text style={styles.cardText}>Price: {ticketFromData.price}</Text>
-            <Text style={styles.cardText}>Ticket ID: {ticketFromData.ticketId}</Text>
+        
 
             <TouchableOpacity
               onPress={() => handleTicketSelect(ticketFromData)}

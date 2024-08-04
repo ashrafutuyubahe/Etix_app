@@ -1,7 +1,51 @@
 const express = require("express");
+const http = require("http");
+const WebSocket = require("ws");
 const Router = express.Router();
-const TicketScheduleModel = require('../models/scheduleModel')
-const dbconnection = require("../dbconnection");
+const TicketScheduleModel = require("../models/scheduleModel");
+const Ticket = require('../models/ticketsModel');
+const boughtTicketScheduleModel = require('../models/boughtTicketModel');
+
+const app = express();
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+
+const totalSeats = 30;
+
+
+wss.on('connection', (ws) => {
+  console.log('New WebSocket client connected');
+
+  ws.on('message', (message) => {
+    console.log(`Received message => ${message}`);
+  });
+
+  
+  ws.send(JSON.stringify({ type: 'initial', totalSeats, availableSeats: totalSeats }));
+});
+
+const updateSeatAvailability = async (carPlate) => {
+  try {
+    const ticketCount = await boughtTicketScheduleModel.countDocuments({ vehicleNumber: carPlate });
+    const availableSeats = totalSeats - ticketCount;
+
+    const message = JSON.stringify({
+      type: 'update',
+      carPlate,
+      availableSeats,
+      isSoldOut: ticketCount >= totalSeats
+    });
+
+    wss.clients.forEach(client => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
+    });
+  } catch (error) {
+    console.error('Error updating seat availability:', error);
+  }
+};
+
 
 Router.post("/addSchedule", async (req, res) => {
   try {
@@ -16,8 +60,31 @@ Router.post("/addSchedule", async (req, res) => {
       agency,
     } = req.body;
 
-    if(!carPlate ||!origin ||!destination || !departureTime ||!arrivalTime ||!cost ||!driverName,!agency) {
+    if (
+      !carPlate ||
+      !origin ||
+      !destination ||
+      !departureTime ||
+      !arrivalTime ||
+      !cost ||
+      !driverName ||
+      !agency
+    ) {
       return res.status(400).json({ error: "All fields are required" });
+    }
+
+    const existingSchedule = await TicketScheduleModel.findOne({
+      carPlate,
+      origin,
+      destination,
+      departureTime,
+      arrivalTime,
+      cost,
+      driverName,
+    });
+
+    if (existingSchedule) {
+      return res.status(400).json({ error: "A similar schedule already exists" });
     }
 
     const newSchedule = new TicketScheduleModel({
@@ -31,24 +98,17 @@ Router.post("/addSchedule", async (req, res) => {
       agency,
     });
 
-    const findScheduleExists = await TicketScheduleModel.findOne({
-      carPlate,
+    const newTicket = new Ticket({
       origin,
       destination,
       departureTime,
-      arrivalTime,
-      cost,
-      driverName,
+      agency,
+      price: cost,
     });
 
-    if (findScheduleExists) {
-      return res
-        .status(401)
-        .json({ error: "A similar schedule already exists"});
-    }
+    await Promise.all([newSchedule.save(), newTicket.save()]);
 
-     if(await newSchedule.save()) return  res.status(201).json({ message: "Schedule added successfully" });
-     return res.status(400).send('failed to add ticket schedule');
+    return res.status(201).json({ message: "Schedule added successfully and tickets have been created" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal server error" });
@@ -56,25 +116,21 @@ Router.post("/addSchedule", async (req, res) => {
 });
 
 
-
-
 Router.get("/findschedule", async (req, res) => {
   try {
     const { origin, destination, agency } = req.query;
 
-    if (!agency || !origin || !destination) {
+    if (!origin || !destination || !agency) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    const retrieveAllTicketSchedule = await TicketScheduleModel.find({ origin, destination, agency });
+    const schedules = await TicketScheduleModel.find({ origin, destination, agency });
 
-    if (retrieveAllTicketSchedule.length === 0) {
-      return res.status(404).json({
-        message: "No tickets schedule found for the specified route and agency",
-      });
+    if (schedules.length === 0) {
+      return res.status(404).json({ message: "No ticket schedules found for the specified route and agency" });
     }
-    
-    return res.status(200).json(retrieveAllTicketSchedule);
+
+    return res.status(200).json(schedules);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });
@@ -83,57 +139,90 @@ Router.get("/findschedule", async (req, res) => {
 
 
 Router.put("/updateSchedule/:id", async (req, res) => {
-  const {id}= req.query
-  const {
-    newCarPlate,
-    newOrigin,
-    newDestination,
-    newDepartureTime,
-    newArrivalTime,
-    newCost,
-    newDriverName,
-    newAgency,
-  } = req.body;
+  try {
+    const { id } = req.params;
+    const {
+      newCarPlate,
+      newOrigin,
+      newDestination,
+      newDepartureTime,
+      newArrivalTime,
+      newCost,
+      newDriverName,
+      newAgency,
+    } = req.body;
 
-  if (
-    (!newCarPlate ||
+    if (
+      !newCarPlate ||
       !newOrigin ||
       !newDestination ||
       !newDepartureTime ||
       !newArrivalTime ||
       !newCost ||
-      !newDriverName,
-    !newAgency)
-  ) {
-    return res.status(400).json({ error: "All fields are required" });
+      !newDriverName ||
+      !newAgency
+    ) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    const schedule = await TicketScheduleModel.findById(id);
+    if (!schedule) {
+      return res.status(404).json({ error: "Schedule not found" });
+    }
+
+    const updatedSchedule = {
+      carPlate: newCarPlate,
+      origin: newOrigin,
+      destination: newDestination,
+      departureTime: newDepartureTime,
+      arrivalTime: newArrivalTime,
+      cost: newCost,
+      driverName: newDriverName,
+      agency: newAgency,
+    };
+
+    const result = await TicketScheduleModel.findByIdAndUpdate(id, updatedSchedule, { new: true });
+    if (!result) {
+      return res.status(400).json({ error: "Failed to update the schedule" });
+    }
+
+    return res.status(200).json({ message: "Schedule updated successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
   }
-
-
-  const checkScheduleExistsWIthId= await TicketScheduleModel.findOne({id});
-  if(!checkScheduleExistsWIthId){
-    res.status(401).send('failed to update the schedule because then schedule is not found')
-  }
-
-  const updatedSchedule={
-    carPlate:newCarPlate,
-    origin:newOrigin,
-    destination:newDestination,
-    departureTime:newDepartureTime,
-    arrivalTime:newArrivalTime,
-    cost:newCost,
-    driverName:newDriverName,
-  }
-  
-  const updatedScheduleQuery= await TicketScheduleModel.findByIdAndUpdate(id,updatedSchedule);
-
-  if(!updatedScheduleQuery){
-  return  res.status(401).send('failed to update the schedule')
-  }
-
-  return res.status(200).send('updating schedule has been made successfully');
-
-
 });
 
+
+Router.get('/getSeat', async (req, res) => {
+  try {
+   
+    const { carPlate } = req.query;
+
+    if (!carPlate) {
+      return res.status(400).json({ error: 'Car plate is required' });
+    }
+
+    const ticketCount = await boughtTicketScheduleModel.countDocuments({ vehicleNumber: carPlate });
+    const availableSeats = totalSeats - ticketCount;
+
+    if (ticketCount >= totalSeats) {
+      return res.status(200).json({ message: "The tickets are sold out" });
+    }
+
+  
+    updateSeatAvailability(carPlate);
+    console.log(availableSeats);
+    console.log(ticketCount);
+    return res.status(200).json({ availableSeats });
+  } catch (error) {
+    console.error('Error fetching available seats:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+server.listen(3000, () => {
+  console.log('Server is listening on port 3000');
+});
 
 module.exports = Router;

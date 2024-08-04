@@ -1,7 +1,9 @@
 {
   "cSpell.words": [
+    "adminauth",
     "Agecny",
     "Agencylogin",
+    "agentauthentication",
     "Airtel",
     "airtelpay",
     "alldrivers",
@@ -11,6 +13,7 @@
     "Driverwith",
     "Eticket",
     "ETIX",
+    "existingadmin",
     "findone",
     "findschedule",
     "findschedulewith",

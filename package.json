@@ -31,6 +31,8 @@
     "passport-google-oauth": "^2.0.0",
     "twilio": "^5.2.2",
     "uuid": "^10.0.0",
+    "websockets": "^0.2.0",
+    "ws": "^8.18.0",
     "xlsx": "^0.18.5"
   }
 }

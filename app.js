@@ -9,6 +9,9 @@ const authenticateToken = require("./middlewares/userAuth");
 const Ticket = require("./models/ticketsModel");
 const BoughtTicket = require("./models/boughtTicketModel");
 const wholeUserAuth = require("./routes/wholeuseAuth");
+const findAvailableSeats= require("./routes/ticketSchedule");
+const AdminAuthentication= require("./routes/adminauth");
+const AgentAuthentication= require("./routes/agentauthentication");
 const User = require("./models/users");
 const connection = require("./dbconnection");
 const sendSMS = require("./msgconfig");
@@ -34,7 +37,8 @@ const app = express();
 const allowedOrigins = [
   "http://localhost:19006",
   "exp://192.168.43.76:8081",
-    "exp://192.168.43.76:8082"
+    "exp://192.168.43.76:8082",
+    "http://localhost:5173/"
 ];
 
 const corsOptions = {
@@ -71,6 +75,9 @@ app.use("/user/send-message/", sendSMS);
 app.use('/admin',TicketSchedule);
 app.use('/tickeschedule/find',TicketSchedule);
 app.use("/uploadTicketScheduleFile",ticketScheduleUpload);
+app.use('/api/seats/',findAvailableSeats);
+app.use("/adminAuth/",AdminAuthentication);
+app.use("/addAgents/",AgentAuthentication);
 
 
 
@@ -406,14 +413,17 @@ app.post("/getYourBoughtTicket", async (req, res) => {
     if (!savedTicket) {
       return res
       .status(500)
-      .json({ error: "Failed to save your bought ticket" });
+      .json({ error: "Failed to save your bought ticket"});
     }
     
-    res.status(201).json(newTicket);
+    res.status(201).json({newTicket,BoughtTicketImg:`<img src="${newTicket.qrCode}" alt="QR Code">`});
+   
   } catch (err) {
     console.error("Error generating QR code or saving ticket:", err);
     res.status(500).json({ error: "Failed to generate ticket" });
   }
+
+
   app.post('/addBoughtTickets', async (req, res) => {
     try {
       const {
