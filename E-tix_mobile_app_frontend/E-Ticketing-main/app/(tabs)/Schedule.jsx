@@ -114,6 +114,41 @@
     };
     
 
+    const handleBookTicket = async (ticket) => {
+      try {
+        const response = await fetch("http://192.168.43.76:2000/findTickets", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            origin: ticket.origin,
+            destination: ticket.destination,
+            agency: ticket.agency,
+          }),
+        });
+  
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+  
+        const result = await response.json();
+  
+        if (Array.isArray(result) && result.length === 0) {
+          Alert.alert(
+            "No Results",
+            "No tickets found for the specified details"
+          );
+        } else {
+          // Navigate to the ticket screen with the selected ticket details
+          navigator.navigate("Tickets", { ticket: result[0] });
+        }
+      } catch (error) {
+        console.error("Fetch error:", error);
+        Alert.alert("Error", "Failed to book the ticket");
+      }
+    };
+
     const closeModal = () => {
       setVisible(false);
     };
@@ -267,7 +302,7 @@
                 <Picker.Item label="Muhanga" value="Muhanga" />
                 <Picker.Item label="Gisenyi" value="Gisenyi" />
                 <Picker.Item label="Musanze" value="Musanze" />
-                <Picker.Item label="Nyamata" value="Nyamata" />
+                <Picker.Item label="Huye" value="Huye" />
                 <Picker.Item label="Ruhango" value="Ruhango" />
               </Picker>
               <Picker

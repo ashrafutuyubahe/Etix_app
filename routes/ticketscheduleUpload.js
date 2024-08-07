@@ -44,7 +44,7 @@ Router.post("/api/upload", upload.single("file"), async (req, res) => {
     }
     return res
       .status(200)
-      .json({ message: "Data processed and saved successfully" });
+      .json({ message: "schedules have been  processed and saved successfully" });
   } catch (error) {
     console.error("Error processing file:", error);
     res.status(500).json({ message: "Error processing file" });

@@ -38,7 +38,7 @@ const allowedOrigins = [
   "http://localhost:19006",
   "exp://192.168.43.76:8081",
     "exp://192.168.43.76:8082",
-    "http://localhost:5173/"
+    "http://localhost:5173"
 ];
 
 const corsOptions = {
@@ -307,6 +307,13 @@ app.post("/airtel-money-webhook", (req, res) => {
   res.sendStatus(200);
 });
 
+
+//test payments
+app.post("/handlePayment", (req, res) => {
+
+  res.json({paymentStatus:"successful"});
+  
+});
 
 
 //Ticket endpoints

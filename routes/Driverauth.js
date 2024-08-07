@@ -45,29 +45,51 @@ Router.post("/driverLogin", async (req, res) => {
   }
 });
 
-Router.post("/getDrivers", async (req, res) => {
+Router.get("/getDrivers", async (req, res) => {
   try {
     const getAlldrivers = await Driver.find();
     if (!getAlldrivers) {
       return res.status(4041).send("failed to get  drivers");
     }
 
-    return res.status(200).json({ alldrivers: getAlldrivers });
+    return res.status(200).json({getAlldrivers});
   } catch (err) {
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
+Router.get("/getDrivers/:id", async (req, res) => {
+  try {
+
+    const {id}= req.params
+
+    const getDriver = await Driver.findById(id);
+
+    if (!getDriver) {
+      return res.status(4041).send("failed to get  drivers");
+    }
+ 
+    return res.status(200).json({getDriver});
+  } catch (err) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
+
+
 Router.delete("/deleteDriver/:id", async (req, res) => {
   try {
-    const { id } = req.query;
-    const findDriverwithIdAndDelete = await Driver.findByIdAndDelete({ id });
+    const { id } = req.params;
+
+    const findDriverwithIdAndDelete = await Driver.findByIdAndDelete(id);
+
     if (!findDriverwithIdAndDelete) {
       return re.status(401).send("failed to delete the Driver");
     }
 
     return res.status(200).send("the Driver has been deleted successfully");
-  } catch (error) {
+  } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal server error" });
   }
@@ -76,42 +98,42 @@ Router.delete("/deleteDriver/:id", async (req, res) => {
 
 
 Router.put("/updateDriver/:id", async (req, res) => {
-  const {id}= req.query
+  const {id}= req.params
   const {
-    newDriverName,
-    newDriverPassword,
-    newDriverCar,
-    newDriverAgency
+    driverName,
+    driverPassword,
+    driverCar,
+    driverAgency
   } = req.body;
 
-  if (!newDriverName ||
-      !newDriverPassword ||
-      !newDriverCar ||
-      !newDriverAgency
+  if (!driverName ||
+      !driverPassword ||
+      !driverCar ||
+      !driverAgency
      ){
     return res.status(400).json({ error: "All fields are required" });
   }
 
 
-  const checkDriverExistsWIthId= await Driver.findOne({id});
+  const checkDriverExistsWIthId= await Driver.findById(id);
   if(!checkDriverExistsWIthId){
     res.status(401).send('failed to update the driver because the Driver is not found')
   }
 
   const updatedDriver={
-    driverName:newDriverName,
-    driverPassword:newDriverPassword,
-    driverCar:newDriverCar,
-    driverAgency:newDriverAgency
+    driverName,
+    driverPassword,
+    driverCar,
+    driverAgency
   }
   
-  const updatedDriverQuery= await TicketScheduleModel.findByIdAndUpdate(id,updatedDriver);
+  const updatedDriverQuery= await Driver.findByIdAndUpdate(id,updatedDriver);
 
   if(!updatedDriverQuery){
-  return  res.status(401).send('failed to update the Driver')
+  return  res.status(401).json({error:'failed to update the Driver'})
   }
 
-  return res.status(200).send('updating the Driver has been made successfully');
+  return res.status(200).json({message:'updating the Driver has been made successfully'});
 
 
 });
