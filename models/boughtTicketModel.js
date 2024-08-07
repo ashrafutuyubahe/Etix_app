@@ -9,10 +9,10 @@ const ticketSchema = new mongoose.Schema({
   departureTime: { type: Date, required: true },
   arrivalTime: { type: Date, required: true },
   purchaseDateTime: { type: Date, default: Date.now },
-  paymentStatus: { type: String, enum: ['successfull', 'pending', 'failed'], default: 'pending' },
+  paymentStatus: { type: String, enum: ['successful', 'pending', 'failed'], default: 'pending' },
    qrCode: { type: String},
   vehicleNumber: { type: String },
-   agency: { type: String },
+   agency: { type: String }
   
   
 });

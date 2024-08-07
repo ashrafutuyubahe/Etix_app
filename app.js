@@ -11,6 +11,7 @@ const BoughtTicket = require("./models/boughtTicketModel");
 const wholeUserAuth = require("./routes/wholeuseAuth");
 const findAvailableSeats= require("./routes/ticketSchedule");
 const AdminAuthentication= require("./routes/adminauth");
+const DownloadReport= require("./routes/downloadReport");
 const AgentAuthentication= require("./routes/agentauthentication");
 const User = require("./models/users");
 const connection = require("./dbconnection");
@@ -78,6 +79,7 @@ app.use("/uploadTicketScheduleFile",ticketScheduleUpload);
 app.use('/api/seats/',findAvailableSeats);
 app.use("/adminAuth/",AdminAuthentication);
 app.use("/addAgents/",AgentAuthentication);
+app.use("/getReportDownload/",DownloadReport);
 
 
 
@@ -318,9 +320,9 @@ app.post("/handlePayment", (req, res) => {
 
 //Ticket endpoints
 app.post("/addTickets", async (req, res) => {
-  const { origin, destination, departureTime, agency, price } = req.body;
-
-  if (!origin || !destination || !departureTime || !agency || !price) {
+  const { origin, destination, departureTime,arrivalTime, agency, price,driverName ,driverCarPlate} = req.body;
+  console.log(req.body)
+  if (!origin || !destination || !departureTime || !agency || !price || !arrivalTime || !driverName ) {
     return res.status(400).json({ error: "All fields are required" });
   }
 
@@ -329,11 +331,32 @@ app.post("/addTickets", async (req, res) => {
       origin,
       destination,
       departureTime,
+      arrivalTime,
+      driverName,
+      driverCarPlate,
       agency,
       price,
     });
 
-    await newTicket.save();
+     const findTicketsExists= await Ticket.findOne({
+      origin,
+      destination,
+      departureTime,
+      arrivalTime,
+      driverCarPlate,
+      agency,
+      price
+      
+    })
+
+    if(findTicketsExists){
+       return res.status(401).send(" there is a similar ticket please add different ticket")
+    }
+
+
+      if( !await newTicket.save()){
+        res.status(401).json({ error: "  failed  to save Ticket" });
+      }
     res.status(201).json({ message: "Ticket added successfully" });
   } catch (error) {
     console.error("Error adding ticket:", error);
@@ -363,6 +386,7 @@ app.post("/findTickets", async (req, res) => {
   }
 });
 
+
 app.post("/getYourBoughtTicket", async (req, res) => {
   const {
     userName,
@@ -375,6 +399,7 @@ app.post("/getYourBoughtTicket", async (req, res) => {
     paymentStatus,
     agency,
   } = req.body;
+
   
   if (
     !userName ||
@@ -384,13 +409,14 @@ app.post("/getYourBoughtTicket", async (req, res) => {
     !departureTime ||
     !arrivalTime ||
     !vehicleNumber ||
+    !paymentStatus ||
     !agency
   ) {
     return res.status(400).json({ error: "All fields are required" });
   }
-  
+
   const ticketId = uuidv4();
-  
+
   const newTicket = new BoughtTicket({
     ticketId,
     userName,
@@ -403,32 +429,34 @@ app.post("/getYourBoughtTicket", async (req, res) => {
     agency,
     paymentStatus,
   });
-  
+
   const qrData = {
     ticketId: newTicket.ticketId,
     userName: newTicket.userName,
     paymentStatus: newTicket.paymentStatus,
   };
-  
+
   const qrString = JSON.stringify(qrData);
-  
+
   try {
     newTicket.qrCode = await QRCode.toDataURL(qrString);
-    
+
     const savedTicket = await newTicket.save();
-    
+
     if (!savedTicket) {
-      return res
-      .status(500)
-      .json({ error: "Failed to save your bought ticket"});
+      return res.status(500).json({ error: "Failed to save your bought ticket" });
     }
-    
-    res.status(201).json({newTicket,BoughtTicketImg:`<img src="${newTicket.qrCode}" alt="QR Code">`});
-   
+
+    // Return QR code as base64 data URL
+    res.status(201).json({
+      newTicket,
+      qrCode: newTicket.qrCode, 
+    });
   } catch (err) {
     console.error("Error generating QR code or saving ticket:", err);
     res.status(500).json({ error: "Failed to generate ticket" });
   }
+});
 
 
   app.post('/addBoughtTickets', async (req, res) => {
@@ -477,7 +505,7 @@ app.post("/getYourBoughtTicket", async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   });
-});
+
 
 
 
