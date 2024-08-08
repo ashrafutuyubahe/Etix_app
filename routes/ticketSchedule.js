@@ -158,32 +158,28 @@ Router.get("/findschedule", async (req, res) => {
 
 
 
+
 Router.get('/getSchedules', async (req, res) => {
   try {
-    // Parse pagination parameters from query string
-    const limit = parseInt(req.query.limit, 10) || 5; // Default limit to 5
-    const offset = parseInt(req.query.offset, 10) || 0; // Default offset to 0
-
-    const schedules = await TicketScheduleModel.find({})
-      .skip(offset)
-      .limit(limit);
-
+    const schedules = await TicketScheduleModel.find({});
     if (schedules.length === 0) {
       return res.status(404).json({ message: 'No ticket schedules found' });
     }
 
     const boughtTickets = await boughtTicketScheduleModel.find({});
+
     const groupedSchedules = {};
 
     schedules.forEach(schedule => {
       const route = `${schedule.origin} - ${schedule.destination}`;
       if (!groupedSchedules[route]) {
         groupedSchedules[route] = {
-          id: schedule._id, // Add the schedule ID
+          id: schedule._id, 
+          route,
           totalSeats: 30,
           availableSeats: 30,
           totalCost: 0,
-          drivers: new Set(),
+          drivers: new Set(), 
         };
       }
     });
@@ -205,7 +201,7 @@ Router.get('/getSchedules', async (req, res) => {
     const scheduleArray = Object.keys(groupedSchedules).map(route => {
       const { id, totalSeats, availableSeats, totalCost, drivers } = groupedSchedules[route];
       return {
-        id, 
+        id, // Include the schedule ID
         route,
         totalSeats,
         availableSeats,
@@ -221,6 +217,24 @@ Router.get('/getSchedules', async (req, res) => {
   }
 });
 
+
+Router.delete('/deleteSchedule/:id', async (req, res) => {
+  try {
+    const scheduleId = req.params.id;
+
+    
+    const result = await TicketScheduleModel.findByIdAndDelete(scheduleId);
+
+    if (!result) {
+      return res.status(404).json({ message: 'Schedule not found' });
+    }
+
+    return res.status(200).json({ message: 'Schedule deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting schedule:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 
 
@@ -308,6 +322,8 @@ Router.put("/updateSchedule/:id", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+
 
 Router.get("/getSeat", async (req, res) => {
   try {

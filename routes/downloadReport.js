@@ -26,7 +26,7 @@ Router.get('/getDailyReports', async (req, res) => {
       if (!report[route][purchaseDate]) {
         report[route][purchaseDate] = {
           seats: 0,
-          driverName: ticket.driverName || "unknown",
+          driverName: ticket.driverName || "paul",
           driverCarPlate: ticket.driverCarPlate,
           totalCost: 0,
           purchasedTickets: [] 
