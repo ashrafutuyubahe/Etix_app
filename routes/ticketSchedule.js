@@ -99,8 +99,7 @@ Router.post("/addSchedule", async (req, res) => {
       arrivalTime,
       cost,
       driverName,
-      driverCarPlate,
-      agency,
+       agency,
     });
 
     const newTicket = new Ticket({
@@ -111,6 +110,7 @@ Router.post("/addSchedule", async (req, res) => {
       agency,
       driverName,
       price: cost,
+      driverCarPlate:carPlate
     });
 
     await Promise.all([newSchedule.save(), newTicket.save()]);
@@ -160,50 +160,52 @@ Router.get("/findschedule", async (req, res) => {
 
 Router.get('/getSchedules', async (req, res) => {
   try {
+    // Parse pagination parameters from query string
+    const limit = parseInt(req.query.limit, 10) || 5; // Default limit to 5
+    const offset = parseInt(req.query.offset, 10) || 0; // Default offset to 0
 
-    const schedules = await TicketScheduleModel.find({});
+    const schedules = await TicketScheduleModel.find({})
+      .skip(offset)
+      .limit(limit);
+
     if (schedules.length === 0) {
       return res.status(404).json({ message: 'No ticket schedules found' });
     }
 
-    
     const boughtTickets = await boughtTicketScheduleModel.find({});
-
-    
     const groupedSchedules = {};
 
-   
     schedules.forEach(schedule => {
       const route = `${schedule.origin} - ${schedule.destination}`;
       if (!groupedSchedules[route]) {
         groupedSchedules[route] = {
-          totalSeats: 30, 
-          availableSeats: 30, 
+          id: schedule._id, // Add the schedule ID
+          totalSeats: 30,
+          availableSeats: 30,
           totalCost: 0,
-          drivers: new Set(), 
+          drivers: new Set(),
         };
       }
     });
-
 
     boughtTickets.forEach(ticket => {
       const route = `${ticket.origin} - ${ticket.destination}`;
       if (groupedSchedules[route]) {
         const seatsPurchased = 1; 
-        groupedSchedules[route].availableSeats = Math.max(0, groupedSchedules[route].availableSeats - seatsPurchased); // Reduce available seats, ensuring it doesn't go below 0
+        groupedSchedules[route].availableSeats = Math.max(0, groupedSchedules[route].availableSeats - seatsPurchased); 
         groupedSchedules[route].totalCost += ticket.price;
 
-        
         groupedSchedules[route].drivers.add({
-          driverName: ticket.driverName || 'Unknown',
-          driverCarPlate: ticket.driverCarPlate || 'Unknown',
+          driverName: ticket.driverName,
+          driverCarPlate: ticket.driverCarPlate,
         });
       }
     });
 
     const scheduleArray = Object.keys(groupedSchedules).map(route => {
-      const { totalSeats, availableSeats, totalCost, drivers } = groupedSchedules[route];
+      const { id, totalSeats, availableSeats, totalCost, drivers } = groupedSchedules[route];
       return {
+        id, 
         route,
         totalSeats,
         availableSeats,
@@ -212,7 +214,6 @@ Router.get('/getSchedules', async (req, res) => {
       };
     });
 
-   
     return res.status(200).json(scheduleArray);
   } catch (error) {
     console.error('Error fetching schedules:', error);

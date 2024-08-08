@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, Image, Tex
 import { useRoute, useNavigation } from '@react-navigation/native';
 import Modal1 from '../components/Modal';
 
+
 const Tickets = () => {
   const route = useRoute();
   const navigation = useNavigation(); 
@@ -80,6 +81,11 @@ const Tickets = () => {
       return;
     }
   
+    if (!selectedTicket.driverCarPlate || !selectedTicket.driverName) {
+      Alert.alert('Error', 'Failed because the ticket lacks one or more required details. Please try again.');
+      return;
+    }
+
     let paymentDetails = {
       ticketId: selectedTicket.ticketId,
       paymentMethod,
@@ -103,6 +109,8 @@ const Tickets = () => {
       paymentDetails.debitCardExpiry = debitCardExpiry;
       paymentDetails.debitCardCVC = debitCardCVC;
     }
+
+  
   
     try {
       const response = await fetch('http://192.168.43.76:2000/handlePayment', {
