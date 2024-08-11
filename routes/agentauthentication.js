@@ -81,7 +81,7 @@ Router.post("/agentLogin", async (req, res) => {
 });
 
 
-// Fetch all agents with all fields
+
 Router.get("/agents", async (req, res) => {
   try {
     const agents = await Agent.find({});
@@ -95,11 +95,11 @@ Router.get("/agents", async (req, res) => {
   }
 });
 
-// Get agent by ID
+
 Router.get('/agents/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    // Ensure the agent data includes the password
+   
     const agent = await Agent.findById(id).select('+agentPassword');
     
     if (!agent) {
@@ -114,17 +114,17 @@ Router.get('/agents/:id', async (req, res) => {
 });
 
 
-// Update an agent's details by ID
+
 Router.put("/UpdateAgent/:id", async (req, res) => {
   const { id } = req.params;
-  const updates = req.body; // Get the updates from the request body
+  const updates = req.body;
 
   try {
-    // Find and update the agent document with the provided fields
+    
     const updatedAgent = await Agent.findByIdAndUpdate(
       id,
-      { $set: updates }, // Use $set to apply only the fields provided in the request body
-      { new: true } // Return the updated document
+      { $set: updates }, 
+      { new: true } 
     );
 
     if (updatedAgent) {
@@ -140,7 +140,7 @@ Router.put("/UpdateAgent/:id", async (req, res) => {
 
 
 
-// Delete an agent by ID
+
 Router.delete("/deleteAgent/:id", async (req, res) => {
 const { id } = req.params;
 

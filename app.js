@@ -386,7 +386,6 @@ app.post("/findTickets", async (req, res) => {
   }
 });
 
-
 app.post("/getYourBoughtTicket", async (req, res) => {
   const {
     userName,
@@ -400,7 +399,6 @@ app.post("/getYourBoughtTicket", async (req, res) => {
     agency,
   } = req.body;
 
-  
   if (
     !userName ||
     !origin ||
@@ -417,30 +415,41 @@ app.post("/getYourBoughtTicket", async (req, res) => {
 
   const ticketId = uuidv4();
 
-  const newTicket = new BoughtTicket({
-    ticketId,
-    userName,
-    origin,
-    destination,
-    price,
-    departureTime,
-    arrivalTime,
-    vehicleNumber,
-    agency,
-    paymentStatus,
-  });
-
-  const qrData = {
-    ticketId: newTicket.ticketId,
-    userName: newTicket.userName,
-    paymentStatus: newTicket.paymentStatus,
-  };
-
-  const qrString = JSON.stringify(qrData);
-
   try {
+   
+    const schedule = await TicketScheduleModel.findOne({ carPlate: vehicleNumber });
+
+    if (!schedule) {
+      return res.status(404).json({ error: "No driver found for the provided vehicle number" });
+    }
+
+    // Create new ticket with driver details
+    const newTicket = new BoughtTicket({
+      ticketId,
+      userName,
+      origin,
+      destination,
+      price,
+      departureTime,
+      arrivalTime,
+      vehicleNumber,
+      agency,
+      paymentStatus,
+      driverName: schedule.driverName, // Include driver name
+    });
+
+    const qrData = {
+      ticketId: newTicket.ticketId,
+      userName: newTicket.userName,
+      paymentStatus: newTicket.paymentStatus,
+    };
+
+    const qrString = JSON.stringify(qrData);
+
+    // Generate QR code
     newTicket.qrCode = await QRCode.toDataURL(qrString);
 
+    // Save the ticket
     const savedTicket = await newTicket.save();
 
     if (!savedTicket) {
@@ -472,11 +481,12 @@ app.post("/getYourBoughtTicket", async (req, res) => {
         paymentStatus,
         qrCode,
         vehicleNumber,
+        driverName,
         agency
       } = req.body;
       
       
-      if (!ticketId || !userName || !origin || !destination || !price || !departureTime || !arrivalTime) {
+      if (!ticketId || !userName || !origin || !destination || !price || !departureTime || !arrivalTime || !driverName) {
         return res.status(400).json({ error: 'All required fields must be provided' });
       }
   
@@ -492,6 +502,7 @@ app.post("/getYourBoughtTicket", async (req, res) => {
         paymentStatus: paymentStatus || 'pending', 
         qrCode,
         vehicleNumber,
+        driverName,
         agency
       });
       

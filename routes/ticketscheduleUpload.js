@@ -3,14 +3,12 @@ const Router = express.Router();
 const multer = require("multer");
 const XLSX = require("xlsx");
 const mongoose = require("mongoose");
-const dbconnection = require("../dbconnection");
 const TicketScheduleModel = require("../models/scheduleModel");
+const Ticket = require("../models/ticketsModel"); 
 
-// In-memory file handling setup for multer
+
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
-
-
 
 Router.post("/api/upload", upload.single("file"), async (req, res) => {
   if (!req.file) {
@@ -18,21 +16,97 @@ Router.post("/api/upload", upload.single("file"), async (req, res) => {
   }
 
   try {
-    // Read and parse the Excel file from memory
-    const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
     
+    const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
     const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
    
+    const savePromises = [];
+    const redundantSchedules = [];
 
-    if (!(await TicketScheduleModel.insertMany(jsonData))) {
-      return res.status(401).send("failed  to save  the file  data");
+    for (const schedule of jsonData) {
+      const {
+        carPlate,
+        origin,
+        destination,
+        departureTime,
+        arrivalTime,
+        cost,
+        driverName,
+        agency,
+      } = schedule;
+
+     
+      if (
+        !carPlate ||
+        !origin ||
+        !destination ||
+        !departureTime ||
+        !arrivalTime ||
+        !cost ||
+        !driverName ||
+        !agency
+      ) {
+        continue; 
+      }
+
+      
+      const existingSchedule = await TicketScheduleModel.findOne({
+        carPlate,
+        origin,
+        destination,
+        departureTime,
+        arrivalTime,
+        cost,
+        driverName,
+      });
+
+      if (existingSchedule) {
+        redundantSchedules.push(schedule);
+      } else {
+      
+        const newSchedule = new TicketScheduleModel({
+          carPlate,
+          origin,
+          destination,
+          departureTime,
+          arrivalTime,
+          cost,
+          driverName,
+          agency,
+        });
+
+        const newTicket = new Ticket({
+          origin,
+          destination,
+          departureTime,
+          arrivalTime,
+          agency,
+          driverName,
+          price: cost,
+          driverCarPlate: carPlate,
+        });
+
+        
+        savePromises.push(newSchedule.save(), newTicket.save());
+      }
     }
-    return res
-      .status(200)
-      .json({ message: "schedules have been  processed and saved successfully" });
+
+  
+    await Promise.all(savePromises);
+
+    
+    let responseMessage = "Schedules have been processed successfully.";
+    if (redundantSchedules.length > 0) {
+      responseMessage += " Some schedules were skipped as they already exist. Please review the file.";
+    }
+
+    return res.status(200).json({
+      message: responseMessage,
+      redundantSchedules
+    });
   } catch (error) {
     console.error("Error processing file:", error);
     res.status(500).json({ message: "Error processing file" });

@@ -34,7 +34,7 @@ Router.post("/driverLogin", async (req, res) => {
     }
 
     const token = jwt.sign({ driverId: driver._id }, SECRET_KEY, {
-      expiresIn: "1h",
+      expiresIn: "4min",
     });
 
     res
@@ -44,6 +44,36 @@ Router.post("/driverLogin", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+
+const blacklist = new Set();
+
+
+const checkBlacklist = (req, res, next) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+  if (blacklist.has(token)) {
+    return res.status(401).json({ error: 'Token is invalid' });
+  }
+  next();
+};
+
+
+Router.post('/logout', (req, res) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+  if (token) {
+    blacklist.add(token);
+    res.json({ message: 'Logged out successfully' });
+  } else {
+    res.status(400).json({ error: 'No token provided' });
+  }
+});
+
+
+
+
+
+
+
 
 Router.get("/getDrivers", async (req, res) => {
   try {
@@ -85,7 +115,7 @@ Router.delete("/deleteDriver/:id", async (req, res) => {
     const findDriverwithIdAndDelete = await Driver.findByIdAndDelete(id);
 
     if (!findDriverwithIdAndDelete) {
-      return re.status(401).send("failed to delete the Driver");
+      return res.status(401).send("failed to delete the Driver");
     }
 
     return res.status(200).send("the Driver has been deleted successfully");

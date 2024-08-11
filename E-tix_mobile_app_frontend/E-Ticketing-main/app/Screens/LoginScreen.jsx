@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { SafeAreaView, View, Image, Animated, Text, TextInput, TouchableOpacity, Alert, StyleSheet, Dimensions, ScrollView, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
+import * as Keychain from 'react-native-keychain';
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
@@ -13,22 +15,23 @@ const LoginScreen = () => {
 
   const handleLogin = async () => {
     setLoading(true);
-
-    
+  
     if (!email.trim() || !password.trim()) {
       Alert.alert('Validation Error', 'Please fill in both email and password.');
       setLoading(false);
       return;
     }
-
+  
     try {
       const response = await axios.post('http://192.168.43.76:2000/userAuth/userlogin', {
         userEmail: email,
         userPassword: password
       });
-
+  
       if (response.status === 200) {
-        // Dispatch setLoginData([email, password]);
+        // Save token to AsyncStorage
+        await AsyncStorage.setItem('token', response.data.token);
+  
         setEmail('');
         setPassword('');
         navigator.navigate('Test');

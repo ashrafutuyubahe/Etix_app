@@ -49,6 +49,8 @@ const updateSeatAvailability = async (carPlate) => {
   }
 };
 
+
+
 Router.post("/addSchedule", async (req, res) => {
   try {
     const {
@@ -126,6 +128,9 @@ Router.post("/addSchedule", async (req, res) => {
   }
 });
 
+
+
+
 Router.get("/findschedule", async (req, res) => {
   try {
     const { origin, destination, agency } = req.query;
@@ -158,28 +163,31 @@ Router.get("/findschedule", async (req, res) => {
 
 
 
-
 Router.get('/getSchedules', async (req, res) => {
   try {
+    // Fetch all schedules
     const schedules = await TicketScheduleModel.find({});
     if (schedules.length === 0) {
       return res.status(404).json({ message: 'No ticket schedules found' });
     }
 
+    // Fetch all bought tickets
     const boughtTickets = await boughtTicketScheduleModel.find({});
 
+    // Create a map to store schedules by route
     const groupedSchedules = {};
 
     schedules.forEach(schedule => {
       const route = `${schedule.origin} - ${schedule.destination}`;
       if (!groupedSchedules[route]) {
         groupedSchedules[route] = {
-          id: schedule._id, 
+          id: schedule._id,
           route,
           totalSeats: 30,
           availableSeats: 30,
           totalCost: 0,
-          drivers: new Set(), 
+          drivers: new Set(),
+          scheduleDetails: schedule
         };
       }
     });
@@ -187,8 +195,8 @@ Router.get('/getSchedules', async (req, res) => {
     boughtTickets.forEach(ticket => {
       const route = `${ticket.origin} - ${ticket.destination}`;
       if (groupedSchedules[route]) {
-        const seatsPurchased = 1; 
-        groupedSchedules[route].availableSeats = Math.max(0, groupedSchedules[route].availableSeats - seatsPurchased); 
+        const seatsPurchased = 1; // Assuming each ticket is for one seat
+        groupedSchedules[route].availableSeats = Math.max(0, groupedSchedules[route].availableSeats - seatsPurchased);
         groupedSchedules[route].totalCost += ticket.price;
 
         groupedSchedules[route].drivers.add({
@@ -198,15 +206,17 @@ Router.get('/getSchedules', async (req, res) => {
       }
     });
 
+    // Convert grouped schedules to an array for response
     const scheduleArray = Object.keys(groupedSchedules).map(route => {
-      const { id, totalSeats, availableSeats, totalCost, drivers } = groupedSchedules[route];
+      const { id, totalSeats, availableSeats, totalCost, drivers, scheduleDetails } = groupedSchedules[route];
       return {
-        id, // Include the schedule ID
+        id,
         route,
         totalSeats,
         availableSeats,
         totalCost,
         drivers: Array.from(drivers),
+        scheduleDetails // Include original schedule details
       };
     });
 
@@ -216,6 +226,7 @@ Router.get('/getSchedules', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 
 Router.delete('/deleteSchedule/:id', async (req, res) => {
@@ -228,6 +239,7 @@ Router.delete('/deleteSchedule/:id', async (req, res) => {
     if (!result) {
       return res.status(404).json({ message: 'Schedule not found' });
     }
+
 
     return res.status(200).json({ message: 'Schedule deleted successfully' });
   } catch (error) {
@@ -280,8 +292,7 @@ Router.put("/updateSchedule/:id", async (req, res) => {
       cost: newCost,
       driverName: newDriverName,
       agency: newAgency,
-    };
-
+    };  
     const result = await TicketScheduleModel.findByIdAndUpdate(
       id,
       updatedSchedule,

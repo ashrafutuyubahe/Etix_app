@@ -6,19 +6,20 @@ import {
   View,
   Animated,
 } from "react-native";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
-import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { setDestinationa, setOrgina } from "../appSlice/appSlices";
 import { useNavigation } from "@react-navigation/native";
 import HorizontalScrollView from "../components/HorizontalScroll";
 import { Dimensions } from "react-native";
 import Modal1 from "../components/Modal";
+import AsyncStorage from "@react-native-async-storage/async-storage"; 
+
 
 const Home = () => {
   const [Orgin, setOrgin] = useState("");
@@ -32,13 +33,43 @@ const Home = () => {
   );
   const navigator = useNavigation();
 
-  const handleLogout = async () => {
-    try {
+
+
+
+ const checkAuthentication = async () => {
+  try {
+    const token = await AsyncStorage.getItem("token"); 
+    if (!token) {
+     Alert.alert("NO TOKEN","please login","No token available ")
       navigation.navigate("Login");
-    } catch (error) {
-      console.error("Failed to log out:", error);
+    } else {
+      
+      console.log("Token found: ", token);
     }
-  };
+  } catch (error) {
+
+    console.error("Error checking authentication:", error);
+  }
+};
+
+
+useEffect(() => {
+  checkAuthentication();
+}, []);
+
+  
+
+ const handleLogout = async () => {
+  try {
+    
+    await AsyncStorage.removeItem("token");
+  
+    navigation.navigate("Login");
+  } catch (error) {
+    console.error("Failed to log out:", error);
+  }
+};
+
 
   const closeModal = () => {
     setModalVisible(false);

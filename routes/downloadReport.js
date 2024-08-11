@@ -1,43 +1,42 @@
-const express = require("express");
+const express = require('express');
 const Router = express.Router();
 const ExcelJS = require('exceljs');
-const boughtTicketScheduleModel = require("../models/boughtTicketModel");
+const boughtTicketScheduleModel = require('../models/boughtTicketModel'); 
 
-// Endpoint to get daily reports
+
+
+
 Router.get('/getDailyReports', async (req, res) => {
   try {
-    // Retrieve all bought tickets
-    const tickets = await boughtTicketScheduleModel.find({});
-
    
+    const tickets = await boughtTicketScheduleModel.find({});
+    
     const report = {};
 
-    
     tickets.forEach(ticket => {
       const route = `${ticket.origin} - ${ticket.destination}`;
       const purchaseDate = new Date(ticket.purchaseDateTime).toISOString().split('T')[0]; 
-
-     
+      const vehicleNumber = ticket.vehicleNumber;
+      const driverName = ticket.driverName || 'David'; 
+      
       if (!report[route]) {
         report[route] = {};
       }
 
-
       if (!report[route][purchaseDate]) {
         report[route][purchaseDate] = {
           seats: 0,
-          driverName: ticket.driverName || "paul",
-          driverCarPlate: ticket.driverCarPlate,
+          driverName: driverName,
+          driverCarPlate: vehicleNumber || 'Unknown', 
           totalCost: 0,
           purchasedTickets: [] 
         };
       }
 
-      
       report[route][purchaseDate].seats += 1;
       report[route][purchaseDate].totalCost += ticket.price;
       report[route][purchaseDate].purchasedTickets.push({
-        ticketId: ticket._id,
+        ticketId: ticket.ticketId,
         userName: ticket.userName,
         price: ticket.price,
         purchaseDateTime: ticket.purchaseDateTime
@@ -55,56 +54,68 @@ Router.get('/getDailyReports', async (req, res) => {
       };
     });
 
-   
     res.json(reportArray);
   } catch (error) {
     console.error('Error generating daily reports:', error);
     res.status(500).send('Error generating daily reports');
   }
 });
+ 
 
 
+
+Router.get('/getAllTickets', async (req, res) => {
+  try {
+  
+    const tickets = await boughtTicketScheduleModel.find({});
+
+  
+    res.json(tickets);
+  } catch (err) {
+    console.error('Error retrieving tickets:', err);
+    res.status(500).json({ error: "Error retrieving tickets" });
+  }
+});
+
+
+   
 Router.get('/download', async (req, res) => {
   try {
-   
+  
     const tickets = await boughtTicketScheduleModel.find({});
+
     
-   
     const report = {};
 
- 
     tickets.forEach(ticket => {
       const route = `${ticket.origin} - ${ticket.destination}`;
-      const purchaseDate = new Date(ticket.purchaseDateTime).toISOString().split('T')[0]; // Format date as YYYY-MM-DD
+      const purchaseDate = new Date(ticket.purchaseDateTime).toISOString().split('T')[0]; 
 
-      
       if (!report[route]) {
         report[route] = {};
       }
 
-    
       if (!report[route][purchaseDate]) {
         report[route][purchaseDate] = {
           seats: 0,
           driverName: ticket.driverName || "unknown",
-          driverCarPlate: ticket.driverCarPlate,
+          driverCarPlate: ticket.vehicleNumber || "N/A",
           totalCost: 0,
           purchasedTickets: [] 
         };
       }
 
-   
       report[route][purchaseDate].seats += 1;
       report[route][purchaseDate].totalCost += ticket.price;
       report[route][purchaseDate].purchasedTickets.push({
-        ticketId: ticket._id,
+        ticketId: ticket.ticketId,
         userName: ticket.userName,
         price: ticket.price,
         purchaseDateTime: ticket.purchaseDateTime
       });
     });
 
-  
+   
     const reportArray = Object.keys(report).map(route => {
       return {
         route,
@@ -119,7 +130,6 @@ Router.get('/download', async (req, res) => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Daily Report');
 
-   
     worksheet.columns = [
       { header: 'Route', key: 'route', width: 25 },
       { header: 'Date', key: 'date', width: 15 },
@@ -139,7 +149,7 @@ Router.get('/download', async (req, res) => {
           worksheet.addRow({
             route: routeReport.route,
             date: dateReport.date,
-            driverName: dateReport.driverName,
+            driverName: dateReport.driverName || "David",
             driverCarPlate: dateReport.driverCarPlate,
             seats: dateReport.seats,
             totalCost: dateReport.totalCost.toFixed(2),
@@ -152,11 +162,9 @@ Router.get('/download', async (req, res) => {
       });
     });
 
-  
+    
     res.setHeader('Content-Disposition', 'attachment; filename=Daily_Report.xlsx');
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-
-  
     await workbook.xlsx.write(res);
     res.end();
   } catch (error) {
@@ -164,5 +172,6 @@ Router.get('/download', async (req, res) => {
     res.status(500).send('Error generating file');
   }
 });
+
 
 module.exports = Router;

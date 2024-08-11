@@ -11,8 +11,10 @@ const ticketSchema = new mongoose.Schema({
   purchaseDateTime: { type: Date, default: Date.now },
   paymentStatus: { type: String, enum: ['successful', 'pending', 'failed'], default: 'pending' },
    qrCode: { type: String},
-  vehicleNumber: { type: String },
-   agency: { type: String }
+  vehicleNumber: { type: String  },
+  driverName:{ type: String},
+   agency: { type: String },
+  
   
   
 });
@@ -20,3 +22,5 @@ const ticketSchema = new mongoose.Schema({
 const BoughtTicket = mongoose.model('BoughtTicket', ticketSchema);
 
 module.exports = BoughtTicket;
+
+

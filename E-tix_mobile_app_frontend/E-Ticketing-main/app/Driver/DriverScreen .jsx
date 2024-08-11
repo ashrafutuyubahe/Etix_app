@@ -22,10 +22,11 @@ const DriverScreen = () => {
     })();
   }, []);
 
+
   const handleBarCodeScanned = async ({ type, data }) => {
     setScanning(false);
     setLoading(true);
-    console.log('Scanned QR code data:', data);
+   
 
     try {
       const parsedData = JSON.parse(data);
@@ -40,7 +41,7 @@ const DriverScreen = () => {
         alert('Ticket validation failed');
       }
     } catch (err) {
-      console.error(err);
+     
       setValidTicket(false);
       alert('An error occurred while validating the ticket');
     } finally {
@@ -64,20 +65,20 @@ const DriverScreen = () => {
 
   return (
     <>
-      <View style={styles.header}>
+      <View style={styles.header}> 
         <TouchableOpacity onPress={() => navigation.navigate('Login')}>
           <MaterialCommunityIcons name="arrow-left" color={'white'} size={28} />
         </TouchableOpacity>
         <Text style={styles.headerText}>Check point</Text>
       </View>
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container}> 
         <ScrollView contentContainerStyle={styles.scrollView}>
           <View style={styles.box1}>
             <Image style={styles.image} source={require('../assets/check.png')} />
           </View>
           <View style={styles.box2}>
             {scanning ? (
-              <BarCodeScanner
+              <BarCodeScanner 
                 style={styles.camera}
                 onBarCodeScanned={handleBarCodeScanned}
                 barCodeTypes={[BarCodeScanner.Constants.BarCodeType.qr]}
@@ -85,7 +86,7 @@ const DriverScreen = () => {
                 <View style={styles.cameraContainer}>
                   <Text style={styles.scanPrompt}>Scanning...</Text>
                 </View>
-              </BarCodeScanner>
+              </BarCodeScanner> 
             ) : (
               <TouchableOpacity
                 style={styles.loginButtonContainer}
