@@ -23,7 +23,7 @@ const LoginScreen = () => {
     }
   
     try {
-      const response = await axios.post('http://192.168.43.76:2000/userAuth/userlogin', {
+      const response = await axios.post('http://192.168.43.76:2002/userAuth/userlogin', {
         userEmail: email,
         userPassword: password
       });

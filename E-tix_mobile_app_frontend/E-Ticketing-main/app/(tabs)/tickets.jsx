@@ -157,7 +157,7 @@ const Tickets = () => {
   const handleGetYourBoughtTicket = async (ticketDetails) => {
    
     try {
-      const response = await fetch('http://192.168.43.76:2000/getYourBoughtTicket', {
+      const response = await fetch('http://192.168.43.76:2002/getYourBoughtTicket', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -31,7 +31,7 @@ const DriverScreen = () => {
     try {
       const parsedData = JSON.parse(data);
       console.log('Parsed QR code data:', parsedData);
-      const response = await axios.post('http://192.168.43.76:2000/scanTicket', parsedData);
+      const response = await axios.post('http://192.168.43.76:2002/scanTicket', parsedData);
 
       if (response.status === 200) {
         setValidTicket(true);
@@ -43,7 +43,7 @@ const DriverScreen = () => {
     } catch (err) {
      
       setValidTicket(false);
-      alert('An error occurred while validating the ticket');
+      alert('the ticket is not valid');
     } finally {
       setLoading(false);
       setScanData(null);
