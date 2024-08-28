@@ -40,9 +40,9 @@ Router.post("/userlogin", async (req, res) => {
 
 
 
-// Middleware to validate the token
+
 Router.get('/validateToken', (req, res) => {
-  // Extract token from the Authorization header
+  
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -59,7 +59,7 @@ Router.get('/validateToken', (req, res) => {
       }
     }
 
-    // Token is valid
+   
     res.json({ message: 'Token is valid', user: decoded });
   });
 });
