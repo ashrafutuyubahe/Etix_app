@@ -423,7 +423,7 @@ app.post("/getYourBoughtTicket", async (req, res) => {
       return res.status(404).json({ error: "No driver found for the provided vehicle number" });
     }
 
-    // Create new ticket with driver details
+ 
     const newTicket = new BoughtTicket({
       ticketId,
       userName,
@@ -435,7 +435,7 @@ app.post("/getYourBoughtTicket", async (req, res) => {
       vehicleNumber,
       agency,
       paymentStatus,
-      driverName: schedule.driverName, // Include driver name
+      driverName: schedule.driverName, 
     });
 
     const qrData = {
@@ -446,17 +446,16 @@ app.post("/getYourBoughtTicket", async (req, res) => {
 
     const qrString = JSON.stringify(qrData);
 
-    // Generate QR code
+   
     newTicket.qrCode = await QRCode.toDataURL(qrString);
 
-    // Save the ticket
+    
     const savedTicket = await newTicket.save();
 
     if (!savedTicket) {
       return res.status(500).json({ error: "Failed to save your bought ticket" });
     }
 
-    // Return QR code as base64 data URL
     res.status(201).json({
       newTicket,
       qrCode: newTicket.qrCode, 
