@@ -165,16 +165,16 @@ Router.get("/findschedule", async (req, res) => {
 
 Router.get('/getSchedules', async (req, res) => {
   try {
-    // Fetch all schedules
+   
     const schedules = await TicketScheduleModel.find({});
     if (schedules.length === 0) {
       return res.status(404).json({ message: 'No ticket schedules found' });
     }
 
-    // Fetch all bought tickets
+ 
     const boughtTickets = await boughtTicketScheduleModel.find({});
 
-    // Create a map to store schedules by route
+    
     const groupedSchedules = {};
 
     schedules.forEach(schedule => {
@@ -195,7 +195,7 @@ Router.get('/getSchedules', async (req, res) => {
     boughtTickets.forEach(ticket => {
       const route = `${ticket.origin} - ${ticket.destination}`;
       if (groupedSchedules[route]) {
-        const seatsPurchased = 1; // Assuming each ticket is for one seat
+        const seatsPurchased = 1; 
         groupedSchedules[route].availableSeats = Math.max(0, groupedSchedules[route].availableSeats - seatsPurchased);
         groupedSchedules[route].totalCost += ticket.price;
 
@@ -206,7 +206,7 @@ Router.get('/getSchedules', async (req, res) => {
       }
     });
 
-    // Convert grouped schedules to an array for response
+    
     const scheduleArray = Object.keys(groupedSchedules).map(route => {
       const { id, totalSeats, availableSeats, totalCost, drivers, scheduleDetails } = groupedSchedules[route];
       return {
@@ -216,7 +216,7 @@ Router.get('/getSchedules', async (req, res) => {
         availableSeats,
         totalCost,
         drivers: Array.from(drivers),
-        scheduleDetails // Include original schedule details
+        scheduleDetails 
       };
     });
 
