@@ -31,6 +31,7 @@ const axios = require("axios");
 const { v4: uuidv4 } = require("uuid");
 const nodemailer = require("nodemailer");
 const cors = require("cors");
+const QRCode = require("qrcode");
 
 //origin config
 const express = require("express");
@@ -520,8 +521,8 @@ app.post("/getYourBoughtTicket", async (req, res) => {
 
 
 
-//scanning endpoints
-const QRCode = require("qrcode");
+
+
 app.get("/getQRcode", async (req, res) => {
   try {
     const dataObject = req.body;
