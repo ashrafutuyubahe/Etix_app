@@ -11,7 +11,7 @@ Router.post("/agentRegister", async (req, res) => {
   try {
     const { agentEmail, agentPassword, agentAgency,agentWorkStation,agentName } = req.body;
 
-    const existingAgent= await Agent.findOne({agentEmail  });
+    const existingAgent= await Agent.findOne({agentEmail});
 
     if (existingAgent) {
       return res.status(400).json({
@@ -73,7 +73,7 @@ Router.post("/agentLogin", async (req, res) => {
 
     res
       .header("Authorization", "Bearer " + token)
-      .json({ message: "Logged in successfully" });
+      .json({ message: "Logged in successfully",token});
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: "Internal server error" });
@@ -116,14 +116,20 @@ Router.get('/agents/:id', async (req, res) => {
 
 
 Router.put("/UpdateAgent/:id", async (req, res) => {
+  
   const { id } = req.params;
-  const updates = req.body;
-
+  const { agentEmail, agentPassword, agentAgency,agentWorkStation,agentName } = req.body;
+  const updateData={ agentEmail, agentPassword, agentAgency,agentWorkStation,agentName };
   try {
     
+    const  checkAgentExists= await Agent.findById(id);
+    if(!checkAgentExists){
+      res.send(401).send("no such agent found");
+    }
+
     const updatedAgent = await Agent.findByIdAndUpdate(
       id,
-      { $set: updates }, 
+      { $set: updateData }, 
       { new: true } 
     );
 

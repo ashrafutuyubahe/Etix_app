@@ -6,6 +6,16 @@ const Driver = require("../models/driverModel");
 const SECRET_KEY = process.env.SECRET_KEY || "your_secret_key";
 const connection = require("../dbconnection");
 const mongoose = require("mongoose");
+const joi= require("joi");
+
+//driver authenticaton
+const driverSchema = joi.object({
+  driverName: joi.string().min(3).max(30).required(),
+  driverPassword: joi.string().required(),
+   driverCar: joi.string().required(),
+   driverAgency:joi.string().required()
+});
+
 
 Router.post("/driverLogin", async (req, res) => {
   try {
@@ -71,6 +81,41 @@ Router.post('/logout', (req, res) => {
 
 
 
+Router.post("/AddDrivers", async (req, res) => {
+  const { error } = driverSchema.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
+
+  try {
+    const { driverName, driverPassword, driverCar, driverAgency } = req.body;
+
+   
+    const existingDriver = await Driver.findOne({ driverName, driverCar });
+    if (existingDriver) {
+      return res.status(400).json({ error: "Driver with that name and car already exists" });
+    }
+ 
+    const hashedPassword = await bcrypt.hash(driverPassword, 10);
+    
+    const newDriver = new Driver({
+      driverName,
+      driverPassword: hashedPassword,
+      driverCar,
+      driverAgency
+    });
+
+    
+    await newDriver.save();
+
+    return res.status(201).json({ message: "Driver has been added successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 
 
 
@@ -96,7 +141,7 @@ Router.get("/getDrivers/:id", async (req, res) => {
     const getDriver = await Driver.findById(id);
 
     if (!getDriver) {
-      return res.status(4041).send("failed to get  drivers");
+      return res.status(4041).send("No  such  driver  found ");
     }
  
     return res.status(200).json({getDriver});
@@ -115,7 +160,7 @@ Router.delete("/deleteDriver/:id", async (req, res) => {
     const findDriverwithIdAndDelete = await Driver.findByIdAndDelete(id);
 
     if (!findDriverwithIdAndDelete) {
-      return res.status(401).send("failed to delete the Driver");
+      return res.status(401).send("No such found");
     }
 
     return res.status(200).send("the Driver has been deleted successfully");

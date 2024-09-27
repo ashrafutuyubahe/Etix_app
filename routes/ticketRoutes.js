@@ -1,0 +1,269 @@
+const express = require("express");
+const Router = express.Router();
+const Driver = require("../models/driverModel");
+const connection = require("../dbconnection");
+const mongoose = require("mongoose");
+const { v4: uuidv4 } = require("uuid");
+const joi= require("joi");
+const TicketSchedule= require('../routes/ticketSchedule');
+const TicketScheduleModel= require('../models/scheduleModel')
+const authenticateToken = require("../middlewares/userAuth");
+const Ticket = require("../models/ticketsModel");
+const BoughtTicket = require("../models/boughtTicketModel");
+
+
+
+
+//Ticket endpoints
+Router.post("/addTickets", async (req, res) => {
+    const { origin, destination, departureTime,arrivalTime, agency, price,driverName ,driverCarPlate} = req.body;
+    console.log(req.body)
+    if (!origin || !destination || !departureTime || !agency || !price || !arrivalTime || !driverName ) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+  
+    try {
+      const newTicket = new Ticket({
+        origin,
+        destination,
+        departureTime,
+        arrivalTime,
+        driverName,
+        driverCarPlate,
+        agency,
+        price,
+      });
+  
+       const findTicketsExists= await Ticket.findOne({
+        origin,
+        destination,
+        departureTime,
+        arrivalTime,
+        driverCarPlate,
+        agency,
+        price
+        
+      })
+  
+      if(findTicketsExists){
+         return res.status(401).send(" there is a similar ticket please add different ticket")
+      }
+  
+  
+        if( !await newTicket.save()){
+          res.status(401).json({ error: "  failed  to save Ticket" });
+        }
+      res.status(201).json({ message: "Ticket added successfully" });
+    } catch (error) {
+      console.error("Error adding ticket:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  });
+  
+  Router.post("/findTickets", async (req, res) => {
+    const { origin, destination, agency } = req.body;
+    
+    if (!origin || !destination || !agency) {
+      return res
+        .status(400)
+        .json({ error: "Origin, destination, and agency are required" });
+    }
+    
+    try {
+      const tickets = await Ticket.find({ origin, destination, agency });
+      if (tickets.length === 0) {
+        return res.status(404).json({
+          message: "No tickets found for the specified route and agency",
+        });
+      }
+      res.json(tickets);
+    } catch (error) {
+      res.status(500).json({ error: "Server error" });
+    }
+  });
+  
+  Router.post("/getYourBoughtTicket", async (req, res) => {
+    const {
+      userName,
+      origin,
+      destination,
+      price,
+      departureTime,
+      arrivalTime,
+      vehicleNumber,
+      paymentStatus,
+      agency,
+    } = req.body;
+  
+    if (
+      !userName ||
+      !origin ||
+      !destination ||
+      !price ||
+      !departureTime ||
+      !arrivalTime ||
+      !vehicleNumber ||
+      !paymentStatus ||
+      !agency
+    ) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+  
+    const ticketId = uuidv4();
+  
+    try {
+     
+      const schedule = await TicketScheduleModel.findOne({ carPlate: vehicleNumber });
+  
+      if (!schedule) {
+        return res.status(404).json({ error: "No driver found for the provided vehicle number" });
+      }
+  
+   
+      const newTicket = new BoughtTicket({
+        ticketId,
+        userName,
+        origin,
+        destination,
+        price,
+        departureTime,
+        arrivalTime,
+        vehicleNumber,
+        agency,
+        paymentStatus,
+        driverName: schedule.driverName, 
+      });
+  
+      const qrData = {
+        ticketId: newTicket.ticketId,
+        userName: newTicket.userName,
+        paymentStatus: newTicket.paymentStatus,
+      };
+  
+      const qrString = JSON.stringify(qrData);
+  
+     
+      newTicket.qrCode = await QRCode.toDataURL(qrString);
+  
+      
+      const savedTicket = await newTicket.save();
+  
+      if (!savedTicket) {
+        return res.status(500).json({ error: "Failed to save your bought ticket" });
+      }
+  
+      res.status(201).json({
+        newTicket,
+        qrCode: newTicket.qrCode, 
+      });
+    } catch (err) {
+      console.error("Error generating QR code or saving ticket:", err);
+      res.status(500).json({ error: "Failed to generate ticket" });
+    }
+  });
+  
+  
+  Router.post('/addBoughtTickets', async (req, res) => {
+      try {
+        const {
+          ticketId,
+          userName,
+          origin,
+          destination,
+          price,
+          departureTime,
+          arrivalTime,
+          paymentStatus,
+          qrCode,
+          vehicleNumber,
+          driverName,
+          agency
+        } = req.body;
+        
+        
+        if (!ticketId || !userName || !origin || !destination || !price || !departureTime || !arrivalTime || !driverName) {
+          return res.status(400).json({ error: 'All required fields must be provided' });
+        }
+    
+        const findTicketsExists= await Ticket.findById(ticketId);
+        if(!findTicketsExists){
+           return res.status(401).send(" there is similar tickets");
+        }
+    
+    
+        const newTicket = new BoughtTicket({
+        ticketId,
+          userName,
+          origin,
+          destination,
+          price,
+          departureTime,
+          arrivalTime,
+          paymentStatus: paymentStatus || 'pending', 
+          qrCode,
+          vehicleNumber,
+          driverName,
+          agency
+        });
+        
+        
+        await newTicket.save();
+        
+        
+        res.status(201).json({ message: 'Ticket added successfully', ticket: newTicket });
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal server error' });
+      }
+    });
+
+    
+
+Router.get("/getQRcode", async (req, res) => {
+    try {
+      const dataObject = req.body;
+      
+      const dataString = JSON.stringify(dataObject);
+      const qrCodeUrl = await QRCode.toDataURL(dataString);
+      
+      res.send(`<img src="${qrCodeUrl}" alt="QR Code">`);
+    } catch (err) {
+      res.status(500).send("Error generating QR code");
+    }
+  });
+
+  
+  Router.post('/scanTicket', async (req, res) => {
+    try {
+      const { ticketId, userName, paymentStatus} = req.body;
+  
+  
+      if (!ticketId || !userName || !paymentStatus) {
+        return res.status(400).json({ error: 'All fields are required' });
+      }
+  
+  
+      const ticket = await BoughtTicket.findOne({ ticketId, userName });
+  
+      if (!ticket) {
+        return res.status(404).json({ error: 'Ticket not found' });
+      }
+  
+  
+      if (ticket.paymentStatus !== paymentStatus) {
+        return res.status(400).json({ error: 'Ticket payment status does not match' });
+      }
+  
+      
+      res.status(200).json({
+        message: 'Ticket is valid and paid',
+     });
+    } catch (err) {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+  
+
+
+    module.exports=Router;
+  
