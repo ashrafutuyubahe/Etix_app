@@ -7,6 +7,57 @@ const connection = require("../dbconnection");
 const mongoose = require("mongoose");
 const Agent = require("../models/agentModel");
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Agent:
+ *       type: object
+ *       required:
+ *         - agentEmail
+ *         - agentPassword
+ *         - agentAgency
+ *         - agentWorkStation
+ *         - agentName
+ *       properties:
+ *         agentEmail:
+ *           type: string
+ *           description: The email of the agent
+ *         agentPassword:
+ *           type: string
+ *           description: The password of the agent
+ *         agentAgency:
+ *           type: string
+ *           description: The agency the agent works for
+ *         agentWorkStation:
+ *           type: string
+ *           description: The agent's workstation
+ *         agentName:
+ *           type: string
+ *           description: The name of the agent
+ */
+
+/**
+ * @swagger
+ * /agentRegister:
+ *   post:
+ *     summary: Register a new agent
+ *     tags: [Agent]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Agent'
+ *     responses:
+ *       201:
+ *         description: Agent added successfully
+ *       400:
+ *         description: Agent already exists
+ *       500:
+ *         description: Internal server error
+*/
+
 Router.post("/agentRegister", async (req, res) => {
   try {
     const { agentEmail, agentPassword, agentAgency,agentWorkStation,agentName } = req.body;
@@ -40,6 +91,36 @@ Router.post("/agentRegister", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+
+
+/**
+ * @swagger
+ * /agentLogin:
+ *   post:
+ *     summary: Log in as an agent
+ *     tags: [Agent]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             properties:
+ *               agentEmail:
+ *                 type: string
+ *               agentPassword:
+ *                 type: string
+ *               agentAgency:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Logged in successfully
+ *       400:
+ *         description: Invalid credentials
+ *       500:
+ *         description: Internal server error
+ */
+
 
 Router.post("/agentLogin", async (req, res) => {
   try {
@@ -80,7 +161,24 @@ Router.post("/agentLogin", async (req, res) => {
   }
 });
 
-
+/**
+ * @swagger
+ * /agents:
+ *   get:
+ *     summary: Get all agents
+ *     tags: [Agent]
+ *     responses:
+ *       200:
+ *         description: A list of agents
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Agent'
+ *       500:
+ *         description: Internal server error
+ */
 
 Router.get("/agents", async (req, res) => {
   try {
@@ -95,6 +193,28 @@ Router.get("/agents", async (req, res) => {
   }
 });
 
+
+/**
+ * @swagger
+ * /agents/{id}:
+ *   get:
+ *     summary: Get an agent by ID
+ *     tags: [Agent]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The agent ID
+ *     responses:
+ *       200:
+ *         description: The agent data
+ *       404:
+ *         description: Agent not found
+ *       500:
+ *         description: Internal server error
+ */
 
 Router.get('/agents/:id', async (req, res) => {
   try {
@@ -114,6 +234,33 @@ Router.get('/agents/:id', async (req, res) => {
 });
 
 
+/**
+ * @swagger
+ * /UpdateAgent/{id}:
+ *   put:
+ *     summary: Update an agent by ID
+ *     tags: [Agent]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The agent ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Agent'
+ *     responses:
+ *       200:
+ *         description: Agent updated successfully
+ *       404:
+ *         description: Agent not found
+ *       500:
+ *         description: Internal server error
+ */
 
 Router.put("/UpdateAgent/:id", async (req, res) => {
   
@@ -145,6 +292,27 @@ Router.put("/UpdateAgent/:id", async (req, res) => {
 });
 
 
+/**
+ * @swagger
+ * /deleteAgent/{id}:
+ *   delete:
+ *     summary: Delete an agent by ID
+ *     tags: [Agent]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The agent ID
+ *     responses:
+ *       200:
+ *         description: Agent deleted successfully
+ *       404:
+ *         description: Agent not found
+ *       500:
+ *         description: Internal server error
+ */
 
 
 Router.delete("/deleteAgent/:id", async (req, res) => {
