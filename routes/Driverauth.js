@@ -8,6 +8,233 @@ const connection = require("../dbconnection");
 const mongoose = require("mongoose");
 const joi= require("joi");
 
+
+
+
+/**
+ * @swagger
+ * tags:
+ *   name: Drivers
+ *   description: Driver management
+ */
+
+/**
+ * @swagger
+ * /driverLogin:
+ *   post:
+ *     tags: [Drivers]
+ *     summary: Login a driver
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               driverName:
+ *                 type: string
+ *                 example: "JohnDoe"
+ *               driverPassword:
+ *                 type: string
+ *                 example: "Password123!"
+ *               driverCar:
+ *                 type: string
+ *                 example: "RAB 123C"
+ *               driverAgency:
+ *                 type: string
+ *                 example: "AgencyName"
+ *     responses:
+ *       200:
+ *         description: Successfully logged in
+ *         headers:
+ *           Authorization:
+ *             description: JWT token
+ *             type: string
+ *             example: "Bearer eyJhbGciOiJIUzI1NiIsInR..."
+ *       400:
+ *         description: Invalid input or credentials
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /logout:
+ *   post:
+ *     tags: [Drivers]
+ *     summary: Logout a driver
+ *     responses:
+ *       200:
+ *         description: Successfully logged out
+ *       400:
+ *         description: No token provided
+ */
+
+/**
+ * @swagger
+ * /AddDrivers:
+ *   post:
+ *     tags: [Drivers]
+ *     summary: Add a new driver
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               driverName:
+ *                 type: string
+ *                 example: "JaneDoe"
+ *               driverPassword:
+ *                 type: string
+ *                 example: "SecurePassword456"
+ *               driverCar:
+ *                 type: string
+ *                 example: "RAB 456C"
+ *               driverAgency:
+ *                 type: string
+ *                 example: "OtherAgency"
+ *     responses:
+ *       201:
+ *         description: Driver added successfully
+ *       400:
+ *         description: Validation error
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /getDrivers:
+ *   get:
+ *     tags: [Drivers]
+ *     summary: Get all drivers
+ *     responses:
+ *       200:
+ *         description: List of drivers
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   driverName:
+ *                     type: string
+ *                     example: "JohnDoe"
+ *                   driverCar:
+ *                     type: string
+ *                     example: "RAB 123C"
+ *                   driverAgency:
+ *                     type: string
+ *                     example: "AgencyName"
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /getDrivers/{id}:
+ *   get:
+ *     tags: [Drivers]
+ *     summary: Get a driver by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Driver ID
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Driver found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 driverName:
+ *                   type: string
+ *                   example: "JohnDoe"
+ *                 driverCar:
+ *                   type: string
+ *                   example: "RAB 123C"
+ *                 driverAgency:
+ *                   type: string
+ *                   example: "AgencyName"
+ *       404:
+ *         description: Driver not found
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /deleteDriver/{id}:
+ *   delete:
+ *     tags: [Drivers]
+ *     summary: Delete a driver by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Driver ID
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Driver deleted successfully
+ *       404:
+ *         description: Driver not found
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /updateDriver/{id}:
+ *   put:
+ *     tags: [Drivers]
+ *     summary: Update a driver by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Driver ID
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               driverName:
+ *                 type: string
+ *                 example: "JohnDoeUpdated"
+ *               driverPassword:
+ *                 type: string
+ *                 example: "NewPassword789"
+ *               driverCar:
+ *                 type: string
+ *                 example: "RAB 789C"
+ *               driverAgency:
+ *                 type: string
+ *                 example: "UpdatedAgency"
+ *     responses:
+ *       200:
+ *         description: Driver updated successfully
+ *       400:
+ *         description: Validation error
+ *       404:
+ *         description: Driver not found
+ *       500:
+ *         description: Internal server error
+ */
+
+
 //driver authenticaton
 const driverSchema = joi.object({
   driverName: joi.string().min(3).max(30).required(),

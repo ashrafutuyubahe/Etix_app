@@ -14,6 +14,8 @@ const BoughtTicket = require("../models/boughtTicketModel");
 
 
 
+
+
 //Ticket endpoints
 Router.post("/addTickets", async (req, res) => {
     const { origin, destination, departureTime,arrivalTime, agency, price,driverName ,driverCarPlate} = req.body;
@@ -266,4 +268,3 @@ Router.get("/getQRcode", async (req, res) => {
 
 
     module.exports=Router;
-  
