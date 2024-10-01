@@ -7,6 +7,263 @@ const Ticket = require("../models/ticketsModel");
 const boughtTicketScheduleModel = require("../models/boughtTicketModel");
 
 
+/**
+ * @swagger
+ * tags:
+ *   name: Tickets
+ *   description: Ticket management
+ */
+
+/**
+ * @swagger
+ * /addTickets:
+ *   post:
+ *     tags: [Tickets]
+ *     summary: Add a new ticket
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               origin:
+ *                 type: string
+ *                 example: "Kigali"
+ *               destination:
+ *                 type: string
+ *                 example: "Butare"
+ *               departureTime:
+ *                 type: string
+ *                 format: date-time
+ *                 example: "2024-10-01T08:00:00Z"
+ *               arrivalTime:
+ *                 type: string
+ *                 format: date-time
+ *                 example: "2024-10-01T10:00:00Z"
+ *               agency:
+ *                 type: string
+ *                 example: "Rwanda Transport"
+ *               price:
+ *                 type: number
+ *                 format: float
+ *                 example: 2500.00
+ *               driverName:
+ *                 type: string
+ *                 example: "John Doe"
+ *               driverCarPlate:
+ *                 type: string
+ *                 example: "RAB 123C"
+ *     responses:
+ *       201:
+ *         description: Ticket added successfully
+ *       400:
+ *         description: All fields are required
+ *       401:
+ *         description: A similar ticket already exists
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @swagger
+ * /findTickets:
+ *   post:
+ *     tags: [Tickets]
+ *     summary: Find tickets based on origin, destination, and agency
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               origin:
+ *                 type: string
+ *                 example: "Kigali"
+ *               destination:
+ *                 type: string
+ *                 example: "Butare"
+ *               agency:
+ *                 type: string
+ *                 example: "Rwanda Transport"
+ *     responses:
+ *       200:
+ *         description: List of tickets found
+ *       400:
+ *         description: Origin, destination, and agency are required
+ *       404:
+ *         description: No tickets found for the specified route and agency
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @swagger
+ * /getYourBoughtTicket:
+ *   post:
+ *     tags: [Tickets]
+ *     summary: Get a bought ticket
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userName:
+ *                 type: string
+ *                 example: "JaneDoe"
+ *               origin:
+ *                 type: string
+ *                 example: "Kigali"
+ *               destination:
+ *                 type: string
+ *                 example: "Butare"
+ *               price:
+ *                 type: number
+ *                 format: float
+ *                 example: 2500.00
+ *               departureTime:
+ *                 type: string
+ *                 format: date-time
+ *                 example: "2024-10-01T08:00:00Z"
+ *               arrivalTime:
+ *                 type: string
+ *                 format: date-time
+ *                 example: "2024-10-01T10:00:00Z"
+ *               vehicleNumber:
+ *                 type: string
+ *                 example: "RAB 123C"
+ *               paymentStatus:
+ *                 type: string
+ *                 example: "paid"
+ *               agency:
+ *                 type: string
+ *                 example: "Rwanda Transport"
+ *     responses:
+ *       201:
+ *         description: Ticket bought successfully
+ *       400:
+ *         description: All fields are required
+ *       404:
+ *         description: No driver found for the provided vehicle number
+ *       500:
+ *         description: Failed to generate ticket
+ */
+
+/**
+ * @swagger
+ * /addBoughtTickets:
+ *   post:
+ *     tags: [Tickets]
+ *     summary: Add a bought ticket
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               ticketId:
+ *                 type: string
+ *                 example: "9f8d157b-6744-4a72-a57b-32139dbb4dc6"
+ *               userName:
+ *                 type: string
+ *                 example: "JaneDoe"
+ *               origin:
+ *                 type: string
+ *                 example: "Kigali"
+ *               destination:
+ *                 type: string
+ *                 example: "Butare"
+ *               price:
+ *                 type: number
+ *                 format: float
+ *                 example: 2500.00
+ *               departureTime:
+ *                 type: string
+ *                 format: date-time
+ *                 example: "2024-10-01T08:00:00Z"
+ *               arrivalTime:
+ *                 type: string
+ *                 format: date-time
+ *                 example: "2024-10-01T10:00:00Z"
+ *               paymentStatus:
+ *                 type: string
+ *                 example: "pending"
+ *               qrCode:
+ *                 type: string
+ *                 example: "data:image/png;base64,..."
+ *               vehicleNumber:
+ *                 type: string
+ *                 example: "RAB 123C"
+ *               driverName:
+ *                 type: string
+ *                 example: "John Doe"
+ *               agency:
+ *                 type: string
+ *                 example: "Rwanda Transport"
+ *     responses:
+ *       201:
+ *         description: Ticket added successfully
+ *       400:
+ *         description: All required fields must be provided
+ *       401:
+ *         description: There are similar tickets
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /getQRcode:
+ *   get:
+ *     tags: [Tickets]
+ *     summary: Generate a QR code
+ *     responses:
+ *       200:
+ *         description: Successfully generated QR code
+ *       500:
+ *         description: Error generating QR code
+ */
+
+/**
+ * @swagger
+ * /scanTicket:
+ *   post:
+ *     tags: [Tickets]
+ *     summary: Scan a ticket to validate it
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               ticketId:
+ *                 type: string
+ *                 example: "9f8d157b-6744-4a72-a57b-32139dbb4dc6"
+ *               userName:
+ *                 type: string
+ *                 example: "JaneDoe"
+ *               paymentStatus:
+ *                 type: string
+ *                 example: "paid"
+ *     responses:
+ *       200:
+ *         description: Ticket is valid and paid
+ *       400:
+ *         description: All fields are required
+ *       404:
+ *         description: Ticket not found
+ *       500:
+ *         description: Internal server error
+ */
+
+
+
+
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });

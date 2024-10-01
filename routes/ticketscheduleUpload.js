@@ -10,6 +10,59 @@ const Ticket = require("../models/ticketsModel");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
+/**
+ * @swagger
+ * /api/upload:
+ *   post:
+ *     tags:
+ *       - Ticket schedule upload file
+ *     summary: Upload ticket schedules
+ *     description: Upload an Excel file containing ticket schedules. The file should include car plate, origin, destination, departure time, arrival time, cost, driver name, and agency.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Schedules have been processed successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 redundantSchedules:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       400:
+ *         description: No file uploaded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Error processing file
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
+
+
 Router.post("/api/upload", upload.single("file"), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: "No file uploaded" });
