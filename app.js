@@ -19,6 +19,7 @@ const connection = require("./dbconnection");
 const sendSMS = require("./msgconfig");
 const SECRET_KEY = process.env.SECRET_KEY || "your_secret_key";
 
+
 //dependency imports
 const joi = require("joi");
 const path = require("path");
@@ -32,6 +33,8 @@ const axios = require("axios");
 const nodemailer = require("nodemailer");
 const cors = require("cors");
 const QRCode = require("qrcode");
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
 
 //origin config
 const express = require("express");
@@ -61,6 +64,10 @@ require("dotenv").config();
 const PORT = process.env.PORT || 3000;
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
+
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 
 
 
