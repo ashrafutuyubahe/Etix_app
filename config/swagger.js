@@ -1,5 +1,5 @@
 const swaggerJsdoc = require('swagger-jsdoc');
-require('dotenv').config(); // Load environment variables
+require('dotenv').config();
 
 const options = {
   definition: {
@@ -15,7 +15,7 @@ const options = {
         description: 'Local server',
       },
       {
-        url: process.env.PROD_SERVER_URL || 'https://etix-production.onrender.com',
+        url: process.env.PROD_SERVER_URL || 'https://etix-mobile-app-deployed-1.onrender.com/',
         description: 'Production server',
       }
     ],
@@ -29,7 +29,7 @@ const options = {
         },
       },
       schemas: {
-        // Admin Schema
+        
         Admin: {
           type: 'object',
           required: ['adminEmail', 'adminPassword', 'adminAgency'],
@@ -52,7 +52,7 @@ const options = {
             },
           },
         },
-        // Agent Schema
+       
         Agent: {
           type: 'object',
           required: ['agentName', 'agentEmail', 'agentPassword', 'agentAgency', 'agentWorkStation'],
@@ -85,7 +85,7 @@ const options = {
             },
           },
         },
-        // BoughtTicket Schema
+       
         BoughtTicket: {
           type: 'object',
           required: ['ticketId', 'userName', 'origin', 'destination', 'price', 'departureTime', 'arrivalTime'],
@@ -155,7 +155,7 @@ const options = {
             },
           },
         },
-        // Driver Schema
+       
         Driver: {
           type: 'object',
           required: ['driverName', 'driverPassword', 'driverCar', 'driverAgency'],
@@ -183,7 +183,7 @@ const options = {
             },
           },
         },
-        // Ticket Schedule Schema
+       
         TicketScheduleModel: {
           type: 'object',
           required: ['carPlate', 'origin', 'destination', 'departureTime', 'arrivalTime', 'cost', 'driverName', 'agency'],
@@ -232,7 +232,7 @@ const options = {
             },
           },
         },
-        // Ticket Schema
+      
         Ticket: {
           type: 'object',
           required: ['origin', 'destination', 'agency', 'departureTime', 'arrivalTime', 'driverName', 'driverCarPlate', 'price'],
@@ -281,7 +281,7 @@ const options = {
             },
           },
         },
-        // User Schema
+       
         User: {
           type: 'object',
           required: ['userName', 'userPassword', 'userPhoneNumber', 'userEmail'],
