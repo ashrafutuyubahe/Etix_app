@@ -11,11 +11,11 @@ const options = {
     },
     servers: [
       {
-        url: process.env.LOCAL_SERVER_URL || 'http://localhost:3000', // Local server URL
+        url: process.env.LOCAL_SERVER_URL || 'http://localhost:2002',
         description: 'Local server',
       },
       {
-        url: process.env.PROD_SERVER_URL || 'https://etix-production.onrender.com', // Production server URL
+        url: process.env.PROD_SERVER_URL || 'https://etix-production.onrender.com',
         description: 'Production server',
       }
     ],
