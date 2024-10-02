@@ -39,24 +39,10 @@ const swaggerSpec = require('./config/swagger');
 //origin config
 const express = require("express");
 const app = express();
-const allowedOrigins = [
-  "http://localhost:19006",
-  "exp://192.168.43.76:8081",
-    "exp://192.168.43.76:8082",
-    "http://localhost:5173"
-];
-
 const corsOptions = {
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg =
-        "The CORS policy for this site does not allow access from the specified origin.";
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
+  origin: "*",
 };
+
 app.use(cors(corsOptions));
 
 //other config

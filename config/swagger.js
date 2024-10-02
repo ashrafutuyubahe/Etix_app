@@ -9,12 +9,7 @@ const options = {
       version: '1.0.0',
       description: 'Comprehensive API documentation for Etix application',
     },
-    servers: [
-      {
-        url: process.env.LOCAL_SERVER_URL || 'http://localhost:2002',
-        description: 'Local server',
-      },
-      {
+    servers: [      {
         url: process.env.PROD_SERVER_URL || 'https://etix-mobile-app-deployed-1.onrender.com/',
         description: 'Production server',
       }
