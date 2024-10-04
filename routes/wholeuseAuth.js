@@ -110,7 +110,12 @@ Router.post("/userRegister", async (req, res) => {
     const saveUser = await newUser.save();
 
     if (saveUser) {
-      return res.status(201).json({ message: "User registered successfully" });
+      return res.status(201).json({userData:{
+        userName,
+        userEmail,
+        userPassword
+
+      }, message: "User registered successfully" });
     }
     return res.status(404).json({ message: "User registration failed" });
   } catch (err) {

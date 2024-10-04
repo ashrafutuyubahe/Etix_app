@@ -127,8 +127,11 @@ Router.post("/userlogin", async (req, res) => {
 
     
     res.json({
+      userData:{
+        userEmail
+      },
       message: "Logged in successfully",
-      token,
+      token
     });
   } catch (err) {
     console.error(err);
