@@ -39,7 +39,7 @@ const Agent = require("../models/agentModel");
 
 /**
  * @swagger
- * /agentRegister:
+ * /addAgents/agentRegister:
  *   post:
  *     summary: Register a new agent
  *     tags: [Agent]
@@ -96,7 +96,7 @@ Router.post("/agentRegister", async (req, res) => {
 
 /**
  * @swagger
- * /agentLogin:
+ * /addAgents/agentLogin:
  *   post:
  *     summary: Log in as an agent
  *     tags: [Agent]
@@ -163,7 +163,7 @@ Router.post("/agentLogin", async (req, res) => {
 
 /**
  * @swagger
- * /agents:
+ * /addAgents/agents:
  *   get:
  *     summary: Get all agents
  *     tags: [Agent]
@@ -196,7 +196,7 @@ Router.get("/agents", async (req, res) => {
 
 /**
  * @swagger
- * /agents/{id}:
+ * /addAgents/agents/{id}:
  *   get:
  *     summary: Get an agent by ID
  *     tags: [Agent]
@@ -236,7 +236,7 @@ Router.get('/agents/:id', async (req, res) => {
 
 /**
  * @swagger
- * /UpdateAgent/{id}:
+ * /addAgents/UpdateAgent/{id}:
  *   put:
  *     summary: Update an agent by ID
  *     tags: [Agent]
@@ -294,7 +294,7 @@ Router.put("/UpdateAgent/:id", async (req, res) => {
 
 /**
  * @swagger
- * /deleteAgent/{id}:
+ * /addAgents/deleteAgent/{id}:
  *   delete:
  *     summary: Delete an agent by ID
  *     tags: [Agent]

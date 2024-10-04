@@ -64,7 +64,7 @@ Router.post("/adminRegister", async (req, res) => {
     const saveAdmin = await newAdmin.save();
 
     if (saveAdmin) {
-      return res.status(201).json({ message: "Admin registered successfully" });
+      return res.status(201).json({ adminData:{adminEmail,adminAgency},message: "Admin registered successfully" });
     }
     return res.status(404).json({ message: "Admin registration failed" });
   } catch (err) {
