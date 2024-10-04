@@ -12,7 +12,7 @@ const upload = multer({ storage: storage });
 
 /**
  * @swagger
- * /api/upload:
+ * /uploadTicketScheduleFile/api/upload:
  *   post:
  *     tags:
  *       - Ticket schedule upload file

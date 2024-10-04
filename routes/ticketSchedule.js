@@ -16,7 +16,7 @@ const boughtTicketScheduleModel = require("../models/boughtTicketModel");
 
 /**
  * @swagger
- * /addTickets:
+ * /tickeschedule/addSchedule/addTickets:
  *   post:
  *     tags: [Tickets]
  *     summary: Add a new ticket
@@ -67,7 +67,7 @@ const boughtTicketScheduleModel = require("../models/boughtTicketModel");
 
 /**
  * @swagger
- * /findTickets:
+ * /tickeschedule/find/findTickets:
  *   post:
  *     tags: [Tickets]
  *     summary: Find tickets based on origin, destination, and agency

@@ -64,7 +64,6 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/user", wholeUserAuth);
 app.use("/userAuth", userlogin);
-app.use("/driverAuth", driverLogin);
 app.use("/driverRoutes",driverLogin);
 
 app.use("/user/send-message/", sendSMS);

@@ -20,7 +20,7 @@ const joi= require("joi");
 
 /**
  * @swagger
- * /driverAuth/driverLogin:
+ * /driverRoutes/driverLogin:
  *   post:
  *     tags: [Drivers]
  *     summary: Login a driver
@@ -59,7 +59,7 @@ const joi= require("joi");
 
 /**
  * @swagger
- * /logout:
+ * /driverRoutes/logout:
  *   post:
  *     tags: [Drivers]
  *     summary: Logout a driver
@@ -106,7 +106,7 @@ const joi= require("joi");
 
 /**
  * @swagger
- * /getDrivers:
+ * /driverRoutes/getDrivers:
  *   get:
  *     tags: [Drivers]
  *     summary: Get all drivers
@@ -135,7 +135,7 @@ const joi= require("joi");
 
 /**
  * @swagger
- * /getDrivers/{id}:
+ * /driverRoutes/getDrivers/{id}:
  *   get:
  *     tags: [Drivers]
  *     summary: Get a driver by ID
@@ -171,7 +171,7 @@ const joi= require("joi");
 
 /**
  * @swagger
- * /deleteDriver/{id}:
+ * /driverRoutes/deleteDriver/{id}:
  *   delete:
  *     tags: [Drivers]
  *     summary: Delete a driver by ID
@@ -193,7 +193,7 @@ const joi= require("joi");
 
 /**
  * @swagger
- * /updateDriver/{id}:
+ * /driverRoutes/updateDriver/{id}:
  *   put:
  *     tags: [Drivers]
  *     summary: Update a driver by ID

@@ -159,7 +159,7 @@ const BoughtTicket = require("../models/boughtTicketModel");
 
 /**
  * @swagger
- * /addBoughtTickets:
+ * /ticketsRoutes/addBoughtTicks/addBoughtTickets:
  *   post:
  *     tags: [Tickets]
  *     summary: Add a bought ticket
@@ -222,7 +222,7 @@ const BoughtTicket = require("../models/boughtTicketModel");
 
 /**
  * @swagger
- * /getQRcode:
+ * /ticketsRoutes/getQrCode/getQRcode:
  *   get:
  *     tags: [Tickets]
  *     summary: Generate a QR code
@@ -235,7 +235,7 @@ const BoughtTicket = require("../models/boughtTicketModel");
 
 /**
  * @swagger
- * /scanTicket:
+ * /ticketsRoutes/scanTicks/scanTicket:
  *   post:
  *     tags: [Tickets]
  *     summary: Scan a ticket to validate it
