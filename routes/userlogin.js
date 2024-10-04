@@ -6,7 +6,7 @@ const User = require("../models/users");
 const SECRET_KEY = process.env.SECRET_KEY || "your_secret_key";
 /**
  * @swagger
- * /userlogin:
+ * /userAuth/userlogin:
  *   post:
  *     tags:
  *       - User Authentication

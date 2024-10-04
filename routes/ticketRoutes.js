@@ -21,7 +21,7 @@ const BoughtTicket = require("../models/boughtTicketModel");
 
 /**
  * @swagger
- * /addTickets:
+ * /ticketsRoutes/addTicks/addTickets:
  *   post:
  *     tags: [Tickets]
  *     summary: Add a new ticket
@@ -72,7 +72,7 @@ const BoughtTicket = require("../models/boughtTicketModel");
 
 /**
  * @swagger
- * /findTickets:
+ * /ticketsRoutes/findTicks/findTickets:
  *   post:
  *     tags: [Tickets]
  *     summary: Find tickets based on origin, destination, and agency
@@ -105,7 +105,7 @@ const BoughtTicket = require("../models/boughtTicketModel");
 
 /**
  * @swagger
- * /getYourBoughtTicket:
+ * /ticketsRoutes/getYourBoughtTicks/getYourBoughtTicket:
  *   post:
  *     tags: [Tickets]
  *     summary: Get a bought ticket

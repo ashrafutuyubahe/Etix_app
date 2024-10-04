@@ -20,7 +20,7 @@ const joi= require("joi");
 
 /**
  * @swagger
- * /driverLogin:
+ * /driverAuth/driverLogin:
  *   post:
  *     tags: [Drivers]
  *     summary: Login a driver
@@ -72,7 +72,7 @@ const joi= require("joi");
 
 /**
  * @swagger
- * /AddDrivers:
+ * /driverRoutes/AddDrivers:
  *   post:
  *     tags: [Drivers]
  *     summary: Add a new driver

@@ -8,7 +8,7 @@ const User = require("../models/users");
 
 /**
  * @swagger
- * /userRegister:
+ * /user/userRegister:
  *   post:
  *     tags:
  *       - User Authentication
