@@ -1,4 +1,4 @@
-// routes/adminRoutes.js
+
 const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -15,7 +15,7 @@ const Admin = require("../models/adminModel");
 
 /**
  * @swagger
- * /adminRegister:
+ * /adminAuth/adminRegister:
  *   post:
  *     summary: Register a new admin
  *     tags: [Admin]
@@ -75,7 +75,7 @@ Router.post("/adminRegister", async (req, res) => {
 
 /**
  * @swagger
- * /adminLogin:
+ * /adminAuth/adminLogin:
  *   post:
  *     summary: Login an admin
  *     tags: [Admin]
